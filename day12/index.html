@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Habesha Market — Ethiopian Marketplace in Bole, Addis Ababa</title>
+    <meta
+      name="description"
+      content="Shop authentic Ethiopian products and reserve a pickup slot at Habesha Market in Bole, Addis Ababa.">
+  </head>
+  <body>
+    <header>
+      <h1>Habesha Market</h1>
+      <nav>
+        <a href="#shop">Shop</a>
+        <a href="#menu">Menu</a>
+        <a href="#reserve">Reserve Pickup</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Products section (from Day 11) -->
+      <section id="shop">
+        <h2>Our Products</h2>
+        <ul>
+          <li>Teff grain</li>
+          <li>Berbere spice blend</li>
+          <li>Ethiopian coffee beans</li>
+        </ul>
+      </section>
+
+      <!-- Day 12: table for tabular data -->
+      <section id="menu">
+        <h2>Café Menu</h2>
+        <table>
+          <caption>Habesha Market Café — Light Menu</caption>
+          <thead>
+            <tr>
+              <th scope="col">Dish</th>
+              <th scope="col">Price (ETB)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Shiro</th>
+              <td>180</td>
+            </tr>
+            <tr>
+              <th scope="row">Tibs</th>
+              <td>360</td>
+            </tr>
+            <tr>
+              <th scope="row">Macchiato</th>
+              <td>60</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Day 12: accessible form, GET vs POST, labels, validation -->
+      <section id="reserve">
+        <h2>Reserve a Pickup Slot</h2>
+        <form action="/reserve" method="post">
+          <fieldset>
+            <legend>Your details</legend>
+
+            <label for="fullname">Full name</label>
+            <input id="fullname" name="fullname" type="text" required>
+
+            <label for="phone">Phone (TeleBirr)</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              pattern="\+251[0-9]{9}"
+              placeholder="+251 9XX XXX XXX"
+              aria-describedby="phone-help"
+              required>
+            <p id="phone-help">Format: +251 followed by 9 digits.</p>
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required>
+          </fieldset>
+
+          <fieldset>
+            <legend>Pickup details</legend>
+
+            <label for="date">Pickup date</label>
+            <input id="date" name="date" type="date" required>
+
+            <label for="location">Pickup location</label>
+            <select id="location" name="location">
+              <option value="bole">Bole</option>
+              <option value="kazanchis">Kazanchis</option>
+              <option value="piassa">Piassa</option>
+            </select>
+
+            <label for="items">Number of items</label>
+            <input id="items" name="items" type="number" min="1" max="12" required>
+          </fieldset>
+
+          <button type="submit">Reserve</button>
+        </form>
+      </section>
+
+      <!-- Day 12: media - figure/figcaption, accessible image -->
+      <article id="about">
+        <h2>About Habesha Market</h2>
+        <p>
+          Habesha Market is a fictional online marketplace bringing
+          <strong>authentic Ethiopian products</strong> to shoppers everywhere.
+          From <em>teff</em> to spice blends, every item is sourced with care.
+        </p>
+
+        <figure>
+          <img
+            src="lalibela.jpg"
+            alt="Rock-hewn church of Bete Giyorgis, Lalibela"
+            width="640"
+            height="420"
+            loading="lazy">
+          <figcaption>
+            Bete Giyorgis, one of the rock-hewn churches of Lalibela —
+            the inspiration behind our brand.
+          </figcaption>
+        </figure>
+
+        <!-- Day 12: iframe with required title, sandboxed for security -->
+        <iframe
+          src="https://maps.example/embed?q=Bole,Addis+Ababa"
+          title="Map showing Habesha Market in Bole"
+          width="100%"
+          height="320"
+          loading="lazy"
+          sandbox="allow-scripts allow-same-origin">
+        </iframe>
+      </article>
+    </main>
+
+    <footer id="contact">
+      <p>Bole, Addis Ababa</p>
+      <p><a href="mailto:hello@habeshamarket.et">Contact us</a></p>
+    </footer>
+  </body>
+</html>
