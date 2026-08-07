@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exercise 4 — Grid Template Areas</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; margin: 0; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    grid-template-areas:
+      "header header"
+      "sidebar main"
+      "footer footer";
+    min-height: 100vh;
+  }
+
+  header  { grid-area: header; background: #1B4D8E; color: #fff; padding: 16px; }
+  .sidebar { grid-area: sidebar; background: #F7FAFC; padding: 16px; }
+  main    { grid-area: main; padding: 16px; }
+  footer  { grid-area: footer; background: #1B4D8E; color: #fff; padding: 16px; text-align: center; }
+
+  @media (max-width: 700px) {
+    .layout {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "header"
+        "sidebar"
+        "main"
+        "footer";
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="layout">
+    <header><h1>Habesha Market</h1></header>
+    <div class="sidebar">
+      <h2>Filters</h2>
+      <p>Category</p>
+      <p>Price range</p>
+    </div>
+    <main>
+      <h2>Products</h2>
+      <p>Main content area — product listings go here.</p>
+    </main>
+    <footer>Bole, Addis Ababa</footer>
+  </div>
+</body>
+</html>

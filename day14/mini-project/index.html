@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flight Results — Addis Ababa to Dubai</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+
+    <header class="site-header">
+      <nav class="navbar">
+        <div class="logo">Ethiopian Airlines</div>
+        <div class="nav-links">
+          <a href="#">Book</a>
+          <a href="#">Manage Trip</a>
+          <a href="#">Check-in</a>
+        </div>
+      </nav>
+    </header>
+
+    <aside class="filters">
+      <h2>Filter Results</h2>
+      <label>
+        Stops
+        <select>
+          <option>Any</option>
+          <option>Nonstop</option>
+          <option>1 stop</option>
+        </select>
+      </label>
+      <label>
+        Departure time
+        <select>
+          <option>Any</option>
+          <option>Morning</option>
+          <option>Evening</option>
+        </select>
+      </label>
+      <label>
+        Max price (ETB)
+        <input type="number" min="0" placeholder="e.g. 15000">
+      </label>
+    </aside>
+
+    <main class="results">
+      <h1>Addis Ababa (ADD) → Dubai (DXB)</h1>
+      <p class="subtitle">3 results · Fri, 14 Aug</p>
+
+      <div class="flight-cards">
+
+        <article class="flight-card">
+          <span class="badge">Best Price</span>
+          <h3>ET 604</h3>
+          <p class="time">08:15 → 12:40</p>
+          <p class="meta">Nonstop · 3h 25m</p>
+          <p class="price">ETB 14,200</p>
+          <button>Select</button>
+        </article>
+
+        <article class="flight-card">
+          <h3>ET 608</h3>
+          <p class="time">14:05 → 18:50</p>
+          <p class="meta">Nonstop · 3h 45m</p>
+          <p class="price">ETB 16,750</p>
+          <button>Select</button>
+        </article>
+
+        <article class="flight-card">
+          <span class="badge">1 Stop</span>
+          <h3>ET 612</h3>
+          <p class="time">21:30 → 05:10 +1</p>
+          <p class="meta">1 stop (JED) · 6h 40m</p>
+          <p class="price">ETB 11,900</p>
+          <button>Select</button>
+        </article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p>Bole International Airport, Addis Ababa · +251 116 179 000</p>
+    </footer>
+
+  </div>
+</body>
+</html>

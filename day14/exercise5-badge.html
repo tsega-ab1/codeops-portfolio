@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exercise 5 — Positioned Badge</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; margin: 24px; }
+
+  .card {
+    position: relative; /* the anchor for the badge */
+    max-width: 260px;
+    background: #F7FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #B33B3B;
+    color: #fff;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <span class="badge">ETB Sale</span>
+    <h2>Berbere Spice Blend</h2>
+    <p>250g jar — freshly ground.</p>
+  </div>
+  <p>The badge anchors to <code>.card</code> because the card has <code>position: relative</code> — without that rule it would jump to the page corner.</p>
+</body>
+</html>

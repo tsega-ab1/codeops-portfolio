@@ -1,0 +1,193 @@
+:root {
+  --brand: #6B1E23;
+  --brand-light: #8C2A30;
+  --gold: #D4A027;
+  --ink: #222;
+  --muted: #666;
+  --border: #E2E8F0;
+  --radius: 10px;
+  --space: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+/* ---- Grid page skeleton ---- */
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-areas:
+    "header header"
+    "filters results"
+    "footer  footer";
+  min-height: 100vh;
+}
+
+.site-header { grid-area: header; }
+.filters     { grid-area: filters; }
+.results     { grid-area: results; }
+.site-footer { grid-area: footer; }
+
+/* ---- Sticky Flexbox navbar ---- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--brand);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px var(--space);
+}
+
+.logo {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+/* ---- Sidebar filter panel ---- */
+.filters {
+  background: #FAFAFA;
+  border-right: 1px solid var(--border);
+  padding: var(--space);
+}
+
+.filters label {
+  display: block;
+  margin-bottom: var(--space);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.filters select,
+.filters input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* ---- Main results area ---- */
+.results {
+  padding: var(--space) calc(var(--space) * 1.5);
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-top: -8px;
+}
+
+/* ---- Responsive card grid, auto-fit ---- */
+.flight-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space);
+  margin-top: var(--space);
+}
+
+/* ---- Flexbox inside each card ---- */
+.flight-card {
+  position: relative; /* anchor for the badge */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space);
+}
+
+.flight-card h3 {
+  margin: 0;
+}
+
+.time {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.price {
+  font-weight: 700;
+  color: var(--brand);
+  margin-top: auto; /* pushes price toward the bottom of the flex column */
+}
+
+.flight-card button {
+  background: var(--gold);
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.flight-card button:hover {
+  background: #C08F1F;
+}
+
+/* ---- Positioned badge, anchored to the relative card ---- */
+.badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--brand-light);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+/* ---- Footer ---- */
+.site-footer {
+  background: #f2f2f2;
+  text-align: center;
+  padding: var(--space);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ---- Collapse to one column on mobile ---- */
+@media (max-width: 700px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "filters"
+      "results"
+      "footer";
+  }
+}

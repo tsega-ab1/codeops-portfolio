@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exercise 2 — Flexible Card Row</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; margin: 24px; }
+
+  .card-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .card {
+    flex: 1;
+    min-width: 180px;
+    background: #F7FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <h1>Products</h1>
+  <div class="card-row">
+    <div class="card">Teff Grain</div>
+    <div class="card">Berbere Spice</div>
+    <div class="card">Coffee Beans</div>
+    <div class="card">Honey Wine</div>
+  </div>
+  <p>Resize the browser narrower — the cards wrap onto a new line instead of squeezing forever.</p>
+</body>
+</html>
