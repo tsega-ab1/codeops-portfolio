@@ -1,9 +1,10 @@
-name: Deploy Day 15 to GitHub Pages
+name: Deploy day15 to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - 'day15/**'
   workflow_dispatch:
 
 permissions:
@@ -11,25 +12,27 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup GitHub Pages
+      - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload Day 15
-        uses: actions/upload-pages-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: ./day15
+          path: 'day15'
 
       - name: Deploy to GitHub Pages
         id: deployment
