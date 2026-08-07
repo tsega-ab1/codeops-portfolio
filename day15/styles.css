@@ -1,0 +1,249 @@
+/* ---- Root tokens ---- */
+:root {
+  --brand: #6B1E23;
+  --brand-hover: #8C2A30;
+  --gold: #D4A027;
+  --ink: #222;
+  --muted: #666;
+  --bg: #FAF7F2;
+  --border: #E2E8F0;
+  --radius: 10px;
+  --space: 16px;
+}
+
+/* ---- Reset ---- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  line-height: 1.6;
+  background: var(--bg);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+h1, h2, h3 {
+  margin-top: 0;
+}
+
+/* ---- Sticky Flexbox navbar ---- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--brand);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px var(--space);
+}
+
+.logo {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+/* ---- Hero, fluid heading with clamp() ---- */
+.hero {
+  padding: 64px var(--space);
+  text-align: center;
+  background: linear-gradient(180deg, #fff, var(--bg));
+}
+
+.hero h1 {
+  font-size: clamp(1.75rem, 5vw, 3rem);
+  color: var(--brand);
+}
+
+.hero-subtitle {
+  color: var(--muted);
+  max-width: 480px;
+  margin: 0 auto 24px;
+}
+
+/* ---- Buttons, one tasteful hover transition ---- */
+.btn {
+  display: inline-block;
+  background: var(--brand);
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease, transform 200ms ease;
+}
+
+.btn:hover {
+  background: var(--brand-hover);
+  transform: translateY(-2px);
+}
+
+/* ---- About ---- */
+.about {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px var(--space);
+  text-align: center;
+}
+
+/* ---- Menu section, auto-fit responsive grid ---- */
+.menu-section {
+  padding: 48px var(--space);
+  text-align: center;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space);
+  margin-top: var(--space);
+  text-align: left;
+}
+
+.menu-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.menu-card img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.menu-card h3,
+.menu-card p {
+  padding: 0 var(--space);
+}
+
+.menu-card h3 {
+  margin-top: 12px;
+}
+
+.price {
+  font-weight: 700;
+  color: var(--brand);
+  padding-bottom: var(--space);
+}
+
+/* ---- Reservation form ---- */
+.reserve-section {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 48px var(--space);
+}
+
+fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space);
+  margin-bottom: var(--space);
+}
+
+legend {
+  font-weight: 700;
+  color: var(--brand);
+  padding: 0 8px;
+}
+
+label {
+  display: block;
+  margin-top: var(--space);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+input:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+#phone-help {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 4px 0 0 0;
+}
+
+.reserve-section .btn {
+  width: 100%;
+  margin-top: var(--space);
+}
+
+/* ---- Footer ---- */
+.site-footer {
+  text-align: center;
+  padding: 32px var(--space);
+  background: var(--brand);
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.site-footer a {
+  color: var(--gold);
+}
+
+/* ---- Respect reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- Mobile-first breakpoints ---- */
+@media (min-width: 768px) {
+  .navbar {
+    padding: 16px 40px;
+  }
+
+  .menu-grid {
+    gap: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    padding: 96px var(--space);
+  }
+}

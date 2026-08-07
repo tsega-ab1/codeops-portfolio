@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Habesha Eatery — Authentic Ethiopian Dining in Bole, Addis Ababa</title>
+  <meta name="description" content="Reserve a table at Habesha Eatery in Bole, Addis Ababa — traditional Ethiopian dishes, warm atmosphere, easy online booking.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <nav class="navbar">
+      <div class="logo">Habesha Eatery</div>
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#menu">Menu</a>
+        <a href="#reserve">Reserve</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- Hero -->
+    <section class="hero">
+      <h1>Taste Ethiopia, in the Heart of Bole</h1>
+      <p class="hero-subtitle">Traditional dishes, slow-roasted spices, and injera made fresh every morning.</p>
+      <a class="btn" href="#reserve">Reserve a Table</a>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="about">
+      <h2>Our Story</h2>
+      <p>
+        Habesha Eatery opened its doors in Bole with one goal:
+        <strong>bring authentic Ethiopian cooking</strong> to every table,
+        made the way it's been made for generations. From <em>doro wat</em>
+        simmered for hours to coffee roasted in-house, every dish carries
+        the warmth of a family kitchen.
+      </p>
+    </section>
+
+    <!-- Menu -->
+    <section id="menu" class="menu-section">
+      <h2>Our Menu</h2>
+      <div class="menu-grid">
+
+        <article class="menu-card">
+          <img src="images/doro-wat.jpg" alt="Doro wat served on injera with a boiled egg" loading="lazy">
+          <h3>Doro Wat</h3>
+          <p>Slow-simmered chicken in berbere sauce, served with injera.</p>
+          <p class="price">ETB 320</p>
+        </article>
+
+        <article class="menu-card">
+          <img src="images/shiro.jpg" alt="Shiro stew in a clay pot" loading="lazy">
+          <h3>Shiro</h3>
+          <p>Spiced chickpea stew, a vegetarian favorite.</p>
+          <p class="price">ETB 180</p>
+        </article>
+
+        <article class="menu-card">
+          <img src="images/tibs.jpg" alt="Sizzling beef tibs with onions and peppers" loading="lazy">
+          <h3>Tibs</h3>
+          <p>Pan-seared beef with onions, rosemary, and jalapeño.</p>
+          <p class="price">ETB 360</p>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Reservation form -->
+    <section id="reserve" class="reserve-section">
+      <h2>Reserve a Table</h2>
+      <form action="/reserve" method="post">
+        <fieldset>
+          <legend>Your details</legend>
+
+          <label for="fullname">Full name</label>
+          <input id="fullname" name="fullname" type="text" required>
+
+          <label for="phone">Phone (TeleBirr)</label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            pattern="\+251[0-9]{9}"
+            placeholder="+251 9XX XXX XXX"
+            aria-describedby="phone-help"
+            required>
+          <p id="phone-help">Format: +251 followed by 9 digits.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Reservation details</legend>
+
+          <label for="date">Date</label>
+          <input id="date" name="date" type="date" required>
+
+          <label for="guests">Number of guests</label>
+          <input id="guests" name="guests" type="number" min="1" max="12" required>
+        </fieldset>
+
+        <button type="submit" class="btn">Confirm Reservation</button>
+      </form>
+    </section>
+
+  </main>
+
+  <footer id="contact" class="site-footer">
+    <p>Bole, Addis Ababa</p>
+    <p>+251 116 179 000 · Open daily 11:00 AM – 10:00 PM</p>
+    <p><a href="mailto:hello@habeshaeatery.et">hello@habeshaeatery.et</a></p>
+  </footer>
+
+</body>
+</html>
