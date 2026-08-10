@@ -1,0 +1,5 @@
+Bill: 480 ETB
+Tip: 48 ETB
+Service fee (telebirr): 2.4 ETB
+Total: 530.4 ETB
+Per person: 132.6 ETB
