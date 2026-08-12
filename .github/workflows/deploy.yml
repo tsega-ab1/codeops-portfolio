@@ -1,10 +1,6 @@
-name: Deploy day15 to GitHub Pages
+name: Deploy selected folders to GitHub Pages
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'day15/**'
   workflow_dispatch:
 
 permissions:
@@ -26,14 +22,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -r day15 _site/day15
+          cp -r day12 _site/day12
+
+          cat > _site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>CodeOps Portfolio</title>
+          </head>
+          <body>
+            <h1>Portfolio</h1>
+            <ul>
+              <li><a href="day12/">Day 12 — Forms, Tables & Media</a></li>
+              <li><a href="day15/">Day 15 — Habesha Eatery (Week 1 Project)</a></li>
+            </ul>
+          </body>
+          </html>
+          EOF
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'day15'
+          path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
