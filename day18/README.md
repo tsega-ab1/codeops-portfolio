@@ -1,4 +1,3 @@
-```markdown
 # Day 18 — Arrays, Objects & Modern JavaScript
 
 ## Structure
@@ -49,7 +48,6 @@ a naming collision.
 ### Sample output
 
 ```
-
 === TeleBirr Transaction Report ===
 
 Total credits: 1500 ETB
@@ -89,6 +87,3 @@ node mini-project/app.js
 - [x] Logic is split across modules with clear `require`/`module.exports` lines
 - [x] Receipt strings use template literals showing customer and ETB amount
 
-```
-
-Same steps as before: `rm day18/README.md`, then `nano day18/README.md`, paste this, save, verify with `cat day18/README.md` that it appears once cleanly, then commit and push.
