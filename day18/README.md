@@ -4,6 +4,7 @@
 
 ```
 day18/
+├── package.json
 ├── exercise1.js
 ├── exercise2.js
 ├── exercise3.js
@@ -18,9 +19,12 @@ day18/
 └── README.md
 ```
 
+`package.json` sets `"type": "module"` so `export`/`import` syntax works
+directly with `node`, matching the assignment's own worked example.
+
 Exercise 5 and the mini-project each get their own subfolder so both can
-use the literal filename `app.js` the assignment brief asks for, without
-a naming collision.
+use the literal filename `app.js` the assignment asks for, without a
+naming collision.
 
 ## Exercises
 
@@ -28,7 +32,7 @@ a naming collision.
 - `exercise2.js` — a customer object, iterated with `Object.entries()` inside a `for...of` loop.
 - `exercise3.js` — one-line destructuring (`{ name, city }`) and a `greet({ name })` function using parameter destructuring.
 - `exercise4.js` — spread creates an updated customer copy (new city, added phone) without mutating the original.
-- `exercise5/money.js` / `exercise5/app.js` — a two-file module split: `money.js` exports `VAT` and `addVat`, `app.js` requires and uses them.
+- `exercise5/money.js` / `exercise5/app.js` — a two-file module split: `money.js` **exports** `VAT` and `addVat`, `app.js` **imports** and uses them.
 
 ## Mini-Project — TeleBirr Transaction Report
 
@@ -42,7 +46,7 @@ a naming collision.
     formatted receipt strings.
   - `correctAmount(txn, newAmount)` — `spread`, returns a corrected copy of
     a transaction without mutating the original.
-- **`mini-project/app.js`** — owns nothing but wiring. Requires both modules,
+- **`mini-project/app.js`** — owns nothing but wiring. Imports both modules,
   calls the report functions, and prints the results.
 
 ### Sample output
@@ -67,9 +71,6 @@ Corrected copy: { id: 1, customer: 'Almaz', amount: 300, type: 'debit' }
 
 ## Running it
 
-Plain CommonJS (`require`/`module.exports`) — no `package.json` or
-special config needed.
-
 ```bash
 node exercise1.js
 node exercise2.js
@@ -84,6 +85,6 @@ node mini-project/app.js
 - [x] `filter`, `map`, `reduce` used — no manual counter loops
 - [x] `buildReceipts` destructures the transaction object in its callback parameter
 - [x] `correctAmount` uses spread; the original transaction is left unchanged
-- [x] Logic is split across modules with clear `require`/`module.exports` lines
+- [x] Logic is split across modules with clear `export`/`import` lines
 - [x] Receipt strings use template literals showing customer and ETB amount
 

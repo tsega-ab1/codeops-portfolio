@@ -1,5 +1,5 @@
-const { transactions } = require('./transactions');
-const { totalByType, buildReceipts, correctAmount } = require('./report');
+import { transactions } from './transactions.js';
+import { totalByType, buildReceipts, correctAmount } from './report.js';
 
 console.log('=== TeleBirr Transaction Report ===\n');
 
