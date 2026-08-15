@@ -1,6 +1,9 @@
 const form = document.querySelector("#search-form");
 const input = document.querySelector("#country");
 const out = document.querySelector("#facts");
+const retryBtn = document.querySelector("#retry");
+
+let lastQuery = "ethiopia";
 
 function renderCountry(c) {
   out.innerHTML = "";
@@ -31,7 +34,10 @@ function renderCountry(c) {
 }
 
 async function showCountry(name) {
-  out.textContent = "Loading…";
+  lastQuery = name;
+  retryBtn.hidden = true;
+  out.innerHTML = `<p class="loading">Loading…</p>`;
+
   try {
     const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}`);
     if (!res.ok) throw new Error("Country not found");
@@ -39,6 +45,7 @@ async function showCountry(name) {
     renderCountry(country);
   } catch (err) {
     out.innerHTML = `<p class="error">${err.message}</p>`;
+    retryBtn.hidden = false;
   }
 }
 
@@ -47,5 +54,7 @@ form.addEventListener("submit", (e) => {
   const name = input.value.trim();
   if (name) showCountry(name);
 });
+
+retryBtn.addEventListener("click", () => showCountry(lastQuery));
 
 showCountry("ethiopia"); // default on load
