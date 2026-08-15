@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signup Form</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Sign Up</h1>
+
+  <form id="signup">
+    <label for="name">Full name</label>
+    <input id="name" type="text" placeholder="e.g. Almaz Bekele">
+
+    <label for="phone">Phone number</label>
+    <input id="phone" type="text" placeholder="09... or +2519...">
+
+    <button type="submit">Sign up</button>
+
+    <p id="msg" class="error"></p>
+  </form>
+
+  <p id="count">0 people have signed up.</p>
+
+  <h2>Signups</h2>
+  <ul id="list"></ul>
+
+  <script src="app.js"></script>
+</body>
+</html>
