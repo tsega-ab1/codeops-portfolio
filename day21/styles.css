@@ -1,0 +1,47 @@
+body {
+  font-family: sans-serif;
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+input {
+  padding: 6px;
+}
+
+button {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.error {
+  color: #d9534f;
+  min-height: 1.2em;
+  margin: 4px 0 0;
+}
+
+#list {
+  list-style: none;
+  padding: 0;
+}
+
+#list li {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+#count {
+  font-weight: bold;
+}
