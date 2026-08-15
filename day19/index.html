@@ -12,10 +12,14 @@
     <input id="name" type="text" placeholder="Item name" required>
     <input id="price" type="number" placeholder="Price (ETB)" required>
     <button type="submit">Add</button>
-  </form>
+</form>
+
+  <div class="controls">
+    <p id="count">0 items</p>
+    <button id="clear-bought" type="button">Clear bought</button>
+  </div>
 
   <ul id="list"></ul>
-
   <p>Total: <span id="total">0</span> ETB</p>
 
   <script src="app.js"></script>
