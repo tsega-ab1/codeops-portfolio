@@ -78,3 +78,18 @@ clearBtn.addEventListener("click", () => {
 });
 
 updateStats(); // initial 0 items
+
+// Day 20 homework: seed the list from a local JSON file on load
+async function loadStarterItems() {
+  try {
+    const res = await fetch("./starter-items.json");
+    if (!res.ok) throw new Error("Could not load starter items");
+    const items = await res.json();
+    items.forEach(it => addRow(it.name, it.price));
+    updateStats();
+  } catch (err) {
+    console.log(err.message); // non-fatal — list just starts empty
+  }
+}
+
+loadStarterItems();
