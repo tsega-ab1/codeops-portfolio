@@ -1,0 +1,25 @@
+body {
+  font-family: sans-serif;
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+#title.highlight {
+  background: yellow;
+  color: black;
+}
+
+#outer {
+  padding: 16px;
+  border: 1px solid #ccc;
+}
+
+li {
+  padding: 4px 0;
+}
+
+.del {
+  margin-left: 8px;
+  cursor: pointer;
+}
