@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bole Weather — Ethiopian Cities</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">☁️</span>
+        <div>
+          <h1>Bole Weather</h1>
+          <p>Ethiopian Cities</p>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a href="#overview" class="nav-item active" data-nav="overview"><span class="nav-icon">⌂</span> Overview</a>
+        <a href="#forecast" class="nav-item" data-nav="forecast"><span class="nav-icon">▦</span> Forecast</a>
+        <a href="#hourly" class="nav-item" data-nav="hourly"><span class="nav-icon">◷</span> Hourly</a>
+        <a href="#favorites" class="nav-item" data-nav="favorites"><span class="nav-icon">★</span> Favorites</a>
+        <a href="#alerts" class="nav-item" data-nav="alerts"><span class="nav-icon">🔔</span> Alerts</a>
+        <a href="#about" class="nav-item" data-nav="about"><span class="nav-icon">ⓘ</span> About</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="skyline" aria-hidden="true">🏙️</div>
+        <blockquote>
+          "The sun does not shine for a few trees and flowers, but for the wide world's joy."
+          <cite>— Henry Ward Beecher</cite>
+        </blockquote>
+        <p class="made-with">Made with <span class="heart">❤</span> in Ethiopia 🇪🇹</p>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+
+      <!-- Header -->
+      <header class="topbar" id="overview">
+        <div class="greet-block">
+          <p id="greeting" class="greeting">Good morning! ☀️</p>
+          <h2 id="city-name">—</h2>
+          <p id="city-datetime" class="city-datetime">—</p>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="unit-toggle" role="group" aria-label="Temperature unit">
+            <button id="unit-c" class="unit-btn active" data-unit="celsius">°C</button>
+            <button id="unit-f" class="unit-btn" data-unit="fahrenheit">°F</button>
+          </div>
+          <div class="theme-toggle" role="group" aria-label="Theme">
+            <button id="theme-light" class="theme-btn active" data-theme="light">☀</button>
+            <button id="theme-dark" class="theme-btn" data-theme="dark">☾</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Hero current-conditions card -->
+      <section class="hero-card" id="hero-card">
+        <div class="hero-top">
+          <div class="hero-temp-block">
+            <div class="hero-temp-row">
+              <span id="hero-temp" class="hero-temp">—</span>
+              <span class="hero-deg">°</span>
+              <span class="hero-icon" id="hero-icon">⛅</span>
+              <span id="hero-condition" class="hero-condition">—</span>
+            </div>
+            <p id="hero-feels" class="hero-feels">Feels like —</p>
+          </div>
+          <div class="hero-live">
+            <span class="live-dot"><span class="dot"></span> Live</span>
+            <span id="hero-updated" class="hero-updated">Updated just now</span>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-icon">💧</span>
+            <div><p class="stat-label">Humidity</p><p id="stat-humidity" class="stat-value">—</p></div>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">🌬️</span>
+            <div><p class="stat-label">Wind</p><p id="stat-wind" class="stat-value">—</p></div>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">📟</span>
+            <div><p class="stat-label">Pressure</p><p id="stat-pressure" class="stat-value">—</p></div>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">👁️</span>
+            <div><p class="stat-label">Visibility</p><p id="stat-visibility" class="stat-value">—</p></div>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">🔆</span>
+            <div><p class="stat-label">UV Index</p><p id="stat-uv" class="stat-value">—</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hourly forecast -->
+      <section class="card" id="hourly">
+        <div class="card-head">
+          <h3>Hourly Forecast</h3>
+          <button id="hourly-toggle" class="link-btn">View full hourly</button>
+        </div>
+        <div id="hourly-row" class="hourly-row"><!-- filled by JS --></div>
+      </section>
+
+      <!-- 7-day forecast -->
+      <section class="card" id="forecast">
+        <div class="card-head">
+          <h3>7-Day Forecast</h3>
+          <button id="daily-toggle" class="link-btn">View full forecast</button>
+        </div>
+        <div id="daily-row" class="daily-row"><!-- filled by JS --></div>
+      </section>
+
+      <footer class="footer">
+        <span>⏱ All times are local (<span id="footer-tz">Africa/Addis_Ababa</span>)</span>
+        <span>↻ Data updates automatically every 15 minutes</span>
+      </footer>
+
+    </main>
+
+    <!-- ============ RIGHT RAIL ============ -->
+    <aside class="right-rail">
+
+      <div class="card" id="favorites">
+        <h3>Search city</h3>
+        <form id="search-form" class="search-form" autocomplete="off">
+          <input id="search-input" type="text" placeholder="e.g. Bole, Dire Dawa…" />
+          <button type="submit" aria-label="Search">🔍</button>
+        </form>
+        <ul id="search-results" class="search-results"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Saved Cities</h3>
+          <span class="muted-link">4 saved</span>
+        </div>
+        <ul id="saved-cities-list" class="saved-cities-list"><!-- filled by JS --></ul>
+      </div>
+
+      <div class="card">
+        <h3>Today's Details</h3>
+        <div class="details-grid" id="details-grid"><!-- filled by JS --></div>
+      </div>
+
+      <div class="card source-card" id="about">
+        <h3>Data Source</h3>
+        <a href="https://open-meteo.com" target="_blank" rel="noopener" class="source-name">Open-Meteo</a>
+        <ul class="source-checks">
+          <li>✅ 100% free</li>
+          <li>✅ No API key required</li>
+          <li>✅ Real-time &amp; forecast data</li>
+          <li>✅ Accurate &amp; reliable</li>
+        </ul>
+        <a href="https://open-meteo.com" target="_blank" rel="noopener" class="source-learn">Learn more at open-meteo.com ↗</a>
+      </div>
+
+    </aside>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
