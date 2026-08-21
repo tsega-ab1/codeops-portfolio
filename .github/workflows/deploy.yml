@@ -1,17 +1,13 @@
 name: Deploy selected folders to GitHub Pages
-
 on:
   workflow_dispatch:
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,14 +17,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Assemble site
         run: |
           mkdir -p _site
           cp -r day12 _site/day12
           cp -r day15 _site/day15
+          cp -r day22 _site/day22
           cp -r day23 _site/day23
-
           cat > _site/index.html << 'EOF'
           <!DOCTYPE html>
           <html lang="en">
@@ -41,20 +36,18 @@ jobs:
             <ul>
               <li><a href="day12/">Day 12 — Forms, Tables & Media</a></li>
               <li><a href="day15/">Day 15 — Habesha Eatery (Week 1 Project)</a></li>
+              <li><a href="day22/">Day 22 — Birr Watch</a></li>
               <li><a href="day23/">Day 23 — Module Project</a></li>
             </ul>
           </body>
           </html>
           EOF
-
       - name: Configure Pages
         uses: actions/configure-pages@v5
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '_site'
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
