@@ -22,7 +22,7 @@ jobs:
           mkdir -p _site
           cp -r day12 _site/day12
           cp -r day15 _site/day15
-          cp -r day15 _site/day19
+          cp -r day19 _site/day19
           cp -r day22 _site/day22
           cp -r day23 _site/day23
           cat > _site/index.html << 'EOF'
