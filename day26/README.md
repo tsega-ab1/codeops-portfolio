@@ -1,16 +1,44 @@
-# React + Vite
+# Day 26 — React Setup & JSX
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Module 3 · Frontend: React & Next.js — IBT College Canada, CodeOps Full Stack Software Development program.
 
-Currently, two official plugins are available:
+## What Today Covered
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+React automates the state → render loop built by hand in Module 2. Today's focus: setting up a modern React project with Vite, and learning JSX — the syntax that makes React feel like HTML with superpowers.
 
-## React Compiler
+## Learning Objectives
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Understand React** — what it is, why it exists, and how it automates the state → render loop
+- **Set up with Vite** — create, run, and understand the structure of a modern React project
+- **Write JSX** — read and write markup inside JavaScript, including expressions, attributes, and its rules
+- **Build components** — create functional components, render them, and compose them together
 
-## Expanding the ESLint configuration
+## Agenda
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Project Setup with Vite
+2. JSX Fundamentals
+3. Functional Components & Rendering
+4. Component Composition
+
+## Key Concepts
+
+| Module 2 (by hand) | React |
+|---|---|
+| `state = { ... }` object | `useState` (soon) |
+| call `render()` yourself | automatic re-render |
+| `innerHTML` + strings | JSX |
+| `addEventListener` | `onClick` props |
+| `querySelector` everywhere | declarative UI |
+
+- **Vite** — fast modern build tool; `npm create vite`, `npm install`, `npm run dev`
+- **JSX** — markup inside JavaScript; `{}` runs JavaScript expressions; one root element per return
+- **Components** — capitalized functions that return JSX; the UI is described, not manually rendered
+- **Composition** — components nest inside components; lists are rendered with `map` and a `key`
+
+## In-Class Exercise
+
+A running Vite + React project that renders a static Addis Eats menu: a `Header` component and a reusable `Dish` component, with the menu rendered from an array using `map` and keys.
+
+## Still Missing
+
+Everything is static — it displays data but does not respond to clicks. State (Day 27–28) is what makes it interactive.
