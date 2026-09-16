@@ -1,0 +1,7 @@
+[
+  { "id": "coding-club", "name": "Coding Club", "description": "Weekly builds, code reviews, and hackathon prep.", "category": "Technology", "image": "https://placehold.co/300x200?text=Coding+Club", "meeting": "Wednesdays, 5pm, Lab 3", "members": 42, "interests": ["Web Dev", "AI", "Open Source"] },
+  { "id": "debate-society", "name": "Debate Society", "description": "Competitive and casual debate for all levels.", "category": "Academic", "image": "https://placehold.co/300x200?text=Debate", "meeting": "Mondays, 6pm, Room 210", "members": 28, "interests": ["Public Speaking", "Politics"] },
+  { "id": "photography-club", "name": "Photography Club", "description": "Campus shoots, editing workshops, and exhibitions.", "category": "Arts", "image": "https://placehold.co/300x200?text=Photography", "meeting": "Fridays, 4pm, Art Building", "members": 35, "interests": ["Photography", "Design"] },
+  { "id": "football-club", "name": "Football Club", "description": "Intramural football, training, and weekend matches.", "category": "Sports", "image": "https://placehold.co/300x200?text=Football", "meeting": "Tuesdays & Thursdays, 5pm, Field 2", "members": 60, "interests": ["Football", "Fitness"] },
+  { "id": "entrepreneurship-hub", "name": "Entrepreneurship Hub", "description": "Pitch nights, mentorship, and startup basics.", "category": "Business", "image": "https://placehold.co/300x200?text=Entrepreneurship", "meeting": "Thursdays, 6pm, Business Building", "members": 31, "interests": ["Startups", "Business"] }
+]

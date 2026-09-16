@@ -1,0 +1,7 @@
+[
+  { "id": "1", "name": "Campus Hackathon", "date": "2026-10-04", "location": "Innovation Lab", "description": "24-hour build sprint with prizes for the top three teams." },
+  { "id": "2", "name": "Debate Finals", "date": "2026-10-10", "location": "Main Auditorium", "description": "The Debate Society's semester-ending championship round." },
+  { "id": "3", "name": "Photo Walk & Exhibition", "date": "2026-10-15", "location": "Art Building Courtyard", "description": "A guided campus photo walk followed by a small exhibition." },
+  { "id": "4", "name": "Career Fair", "date": "2026-10-22", "location": "Sports Hall", "description": "Meet employers and alumni from a range of industries." },
+  { "id": "5", "name": "Startup Pitch Night", "date": "2026-10-29", "location": "Business Building", "description": "Student teams pitch to a panel of local entrepreneurs." }
+]
