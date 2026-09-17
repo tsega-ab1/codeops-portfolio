@@ -65,9 +65,3 @@ Clubs and events are served from local JSON files in public/ (clubs.json, events
 
     npm install
     npm run dev
-
-## Still To Do
-
-- Real photography in place of placeholder club/event images
-- Responsive layout pass for tablet and mobile
-- Deployment to Netlify or Vercel, plus a live demo link
