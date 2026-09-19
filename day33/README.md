@@ -1,51 +1,44 @@
-# Day 32 — Context API & State Management
+# Day 33 — Forms & Controlled Components
 
 Module 3 · Frontend: React & Next.js — IBT College Canada, CodeOps Full Stack Software Development program. Week 7.
 
 ## What Today Covered
 
-The context patterns worth knowing, what a state library actually adds, Zustand as the tool to build with, and enough Redux Toolkit to read it confidently in an existing codebase. The Addis Eats cart moves out of a provider and into a store — and almost nothing in the screens has to change.
+The Addis Eats checkout, built as an interface rather than a set of inputs: mechanics first, then validation rules and their timing, then feedback everyone can perceive.
 
-## Why the cart is in a store and the session is not
+## Validation Rules and Why They Exist
 
-The **cart** changes on nearly every click, is read by the header badge, the dish page, the cart page and checkout, and needs to survive a refresh. That is a busy, widely-read, persisted slice — exactly what a store is for. Living outside the component tree means it survives navigation because of where it lives, not because a provider happens to stay mounted, and the `persist` middleware gives durability in one line.
+| Field | Rule | Why |
+|---|---|---|
+| Name | Must not be empty | The order needs a name for delivery |
+| Phone | Must match `0` or `+251` followed by `9` and 8 digits | Ethiopian mobile numbers arrive as `0911…` or `+251911…`; spaces are stripped before testing so formatting never causes a false rejection |
+| Area | Must be selected | Delivery cannot be routed without a destination |
+| Notes | No rule | Optional by design — nothing to validate |
 
-The **session** is a single value that changes twice in a visit — sign in, sign out. It is read by the route guard and the login screen and nothing else. Context already answers that well, and a store would add a dependency for no benefit. The rule: reach for a store when there are many slices, frequent updates, or a real need for persistence; otherwise context is enough.
+## The Six States
 
-## Key Concepts
+Every state the reading sheet describes is handled explicitly, not just "typing" and "sent":
 
-### Context in Depth
-- Wrap each context in its own guarded hook — without the guard, forgetting the provider gives `null` and a crash somewhere unrelated; the hook fails immediately and says exactly what is wrong
-- Export the hook and keep the context object private to the module
-- Split contexts by how often they change — one context holding user, cart, theme and language ties them together, so the rare value pays the cost of the busy one
-- Splitting state from dispatch is another useful division: dispatch never changes, so write-only components never re-render when the data does
+- **Pristine** — no errors shown until a field has been visited
+- **Dirty** — the person's input kept exactly as typed
+- **Invalid** — the specific problem shown beside the field it belongs to
+- **Submitting** — the button disables and reads "Sending your order…"
+- **Failed** — the reason is shown, and every field keeps its value — nothing is cleared
+- **Succeeded** — the cart clears and the person is redirected
 
-### Zustand
-- A store in one `create` call, with no provider to mount — `create` takes a function receiving `set` and returning the initial state; actions live in the same object
-- `set` merges rather than replaces, so `set({ items: [] })` leaves other keys untouched; pass a function when the new value depends on the old
-- Because the store is a module, any component imports it directly — nothing has to be mounted above, and moving a component in the tree cannot break its access
-- **Selectors are the entire benefit** — `useCartStore((s) => s.items)` re-renders only when items change; a bare `useCartStore()` takes the whole store and behaves exactly like context
-- A component selecting only an action never re-renders at all
-- Returning a fresh object from a selector defeats the comparison Zustand uses, so it always looks changed — prefer one selector per value
-- The `persist` middleware stores the slice under a named key so it survives a refresh
+## Key Concepts Applied
 
-### Redux Toolkit (read, don't build)
-- `createSlice` takes initial state and reducers, and generates the action creators
-- Writing `state.items.push(...)` looks like mutation, but Immer records changes against a draft and produces a new object — this applies only inside a slice; everywhere else the no-mutation rule still holds
-- `configureStore`, a `<Provider store={store}>`, then `useSelector` and `useDispatch` in components
-- `useSelector` is the selector from Zustand, `dispatch` is dispatch from a reducer, and Provider is the context provider — every idea is one already learned
+- One state object for the whole form, one `handleChange` using the updater form (`setForm(f => ...)`) so fast edits never read a stale value
+- `validate(form)` is a pure function, called during render so errors are derived and can never disagree with the values
+- Errors show only after a field is **touched** (on blur), then update live once a field has been visited — the "after first blur, then live" pattern
+- `Field.jsx` wires `htmlFor`/`id`, `aria-invalid`, `aria-describedby`, and `role="alert"` so a screen reader actually announces the problem
+- On a failed submit, focus moves to the first invalid field — color is never the only signal
+- The `submitting` flag disables the button and prevents a double order from a slow connection or an impatient click
+- The ETB total is shown in the submit button label itself, so nobody confirms an order without seeing what it costs
+- A simulated request failure keeps every field intact, proving the "never clear the form" rule actually holds
 
-### Choosing well
-- Start with `useState` — most state belongs in the component using it
-- Lift to **context** when a few values are shared widely and change on user actions
-- Reach for a **store** when there are many slices, frequent updates, or a real need for devtools and persistence
-- Keep **server data** out of all three — putting fetched data in a global store means owning caching, refetching and staleness by hand
+## Files
 
-## Mini-Project: The Cart, Moved to a Store
-
-- Guarded `useAuth` and `useTheme` hooks that throw an actionable error outside their provider
-- Separate `AuthProvider` and `ThemeProvider`, no longer bundled into one value
-- A Zustand cart store with `items`, `addItem`, `remove` and `clear`
-- Every consumer reading through a narrow selector — no bare `useCartStore()` calls anywhere
-- The `persist` middleware configured under `addis-eats-cart`, with the order restored on reload
-- `CartProvider`, the reducer file, and the `useMemo` on the provider value all deleted
+- `Checkout.jsx` — the form itself
+- `validate.js` — the pure validation function, testable with no React involved
+- `Field.jsx` — reusable label + input + accessible error wrapper
