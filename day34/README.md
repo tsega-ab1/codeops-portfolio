@@ -1,44 +1,45 @@
-# Day 33 — Forms & Controlled Components
+# Day 34 — Error Boundaries, Performance & Lazy Loading
 
 Module 3 · Frontend: React & Next.js — IBT College Canada, CodeOps Full Stack Software Development program. Week 7.
 
 ## What Today Covered
 
-The Addis Eats checkout, built as an interface rather than a set of inputs: mechanics first, then validation rules and their timing, then feedback everyone can perceive.
+Four concerns that separate a working application from a professional one: boundaries so a failure stays local, code splitting so the first screen arrives sooner, profiling so any optimisation is earned, and portals so a modal can escape the card that opened it.
 
-## Validation Rules and Why They Exist
+## Key Concepts
 
-| Field | Rule | Why |
-|---|---|---|
-| Name | Must not be empty | The order needs a name for delivery |
-| Phone | Must match `0` or `+251` followed by `9` and 8 digits | Ethiopian mobile numbers arrive as `0911…` or `+251911…`; spaces are stripped before testing so formatting never causes a false rejection |
-| Area | Must be selected | Delivery cannot be routed without a destination |
-| Notes | No rule | Optional by design — nothing to validate |
+### Error Boundaries
+- If a component throws during render, React unmounts the **entire** tree by default — an error boundary tells it to keep the rest and replace only the broken region
+- `getDerivedStateFromError` renders the fallback; `componentDidCatch` is the side-effect half, where the error gets reported
+- Boundaries catch errors during render, in lifecycle methods, and in child components — they do **not** catch errors in event handlers, async code/promises, or in the boundary itself
+- Placed at meaningful seams: if the menu fails, the cart and header should still work, so the boundary wraps the menu, not the whole application
+- A fallback says what failed and offers an action — a dead-end apology is barely better than a white screen
 
-## The Six States
+### Code Splitting & Lazy Loading
+- By default every screen ships in one bundle downloaded up front — `lazy()` plus a dynamic `import()` splits a route into its own file, downloaded only the first time it actually renders
+- A `Suspense` boundary above a lazy component is required, or it throws while loading
+- Worth splitting: routes other than the landing screen, rarely opened modals/panels, heavy libraries. Not worth splitting: the first screen, small components used everywhere, anything under a few kilobytes
+- Measure before splitting — splitting a small app achieves nothing
 
-Every state the reading sheet describes is handled explicitly, not just "typing" and "sent":
+### Performance in Practice
+- Profile a slow interaction, find the longest bar in the ranked chart, ask *why* it rendered, fix the cause, then measure again
+- Reasons a component re-renders: its own state changed (correct, nothing to do), its parent re-rendered (React.memo or move state down), a prop is a new object each render (`useMemo`), a handler is recreated each render (`useCallback` + memoised child), or the context value changed (split the context or use a store)
+- Order of steps: measure → move state down → split context / narrow store selectors → memoise the specific value → `React.memo` the child → virtualise/paginate if genuinely large
+- If a memo made no measurable difference, take it out — unjustified optimisation is code someone else has to maintain forever
 
-- **Pristine** — no errors shown until a field has been visited
-- **Dirty** — the person's input kept exactly as typed
-- **Invalid** — the specific problem shown beside the field it belongs to
-- **Submitting** — the button disables and reads "Sending your order…"
-- **Failed** — the reason is shown, and every field keeps its value — nothing is cleared
-- **Succeeded** — the cart clears and the person is redirected
+### Portals
+- A modal inside a card with `overflow: hidden` gets clipped — CSS can't fix it, since the problem is *where* the element lives in the DOM
+- `createPortal(children, domNode)` renders content into a different DOM node while keeping it a child in the **React** tree — it still reads the same context, and its events still bubble to its React parent, not the DOM node it landed in
+- A usable modal needs: focus moved in on open, focus trapped inside while open, Escape to close, focus returned to the trigger on close, and `role="dialog"` with a label
 
-## Key Concepts Applied
+## What Was Built
 
-- One state object for the whole form, one `handleChange` using the updater form (`setForm(f => ...)`) so fast edits never read a stale value
-- `validate(form)` is a pure function, called during render so errors are derived and can never disagree with the values
-- Errors show only after a field is **touched** (on blur), then update live once a field has been visited — the "after first blur, then live" pattern
-- `Field.jsx` wires `htmlFor`/`id`, `aria-invalid`, `aria-describedby`, and `role="alert"` so a screen reader actually announces the problem
-- On a failed submit, focus moves to the first invalid field — color is never the only signal
-- The `submitting` flag disables the button and prevents a double order from a slow connection or an impatient click
-- The ETB total is shown in the submit button label itself, so nobody confirms an order without seeing what it costs
-- A simulated request failure keeps every field intact, proving the "never clear the form" rule actually holds
+- `ErrorBoundary.jsx` — the class component, with `MenuUnavailable`, `CartUnavailable`, and `AppCrashed` as fallbacks at different seams (menu, cart, whole app)
+- A deliberate crash button on the dish detail page, confirming the menu boundary catches it while the header and cart keep working
+- `Checkout.jsx` and `Receipt.jsx` lazy-loaded behind a `Suspense` skeleton, verified in the Network tab under throttling
+- `Modal.jsx` — a portal-based quick-view modal with Escape-to-close, a small focus trap, and focus returned to the trigger on close
+- `PROFILE.md` — a real Profiler recording of adding a dish to the cart
 
-## Files
+## Profiling Result
 
-- `Checkout.jsx` — the form itself
-- `validate.js` — the pure validation function, testable with no React involved
-- `Field.jsx` — reusable label + input + accessible error wrapper
+Profiled adding a dish to the cart. Layout re-rendered (5.6ms) correctly, since its own state changed (the cart badge count). DishDetail did not re-render at all — it selects only the `addItem` action from the Zustand store, which is a stable reference. **No fix was applied**, since the narrow-selector discipline from Day 32 already prevents the unnecessary re-render the profiling was meant to catch. Full detail in `PROFILE.md`.
