@@ -77,7 +77,7 @@ function Checkout() {
     try {
       const order = await submitOrder({ ...form, items, total });
       clear();
-      navigate(`/`, { replace: true, state: { orderPlaced: order.id } });
+      navigate("/receipt", { replace: true, state: { orderPlaced: order.id } });
     } catch (err) {
       // Every value stays in the form — never clear on failure.
       setServerError(err.message);
