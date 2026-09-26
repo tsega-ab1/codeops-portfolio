@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Day 37 — Layouts & Rendering Strategies
 
-## Getting Started
+Module 3 · Frontend: React & Next.js — IBT College Canada, CodeOps Full Stack Software Development program. Week 8.
 
-First, run the development server:
+Built against Next.js 16's **Cache Components** model (`cacheComponents: true`), which supersedes the older `revalidate`/`dynamic` export API with `use cache`, `cacheLife`, `cacheTag`, `revalidateTag`, `updateTag`, and `connection()`.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Route Table (verified with `npm run build`)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Route | File | Marker | Strategy |
+|---|---|---|---|
+| `/` | `app/page.js` | ○ Static | Prebuilt once |
+| `/menu` | `app/menu/page.js` | ○ Static, revalidates hourly | `use cache` + `cacheLife("hours")` on `getDishes()` |
+| `/menu/[id]` | `app/menu/[id]/page.js` | ○ for known ids, ◐ fallback | `generateStaticParams()` prebuilds kitfo, pizza, burger |
+| `/cart` | `app/cart/page.js` | ○ Static | No dynamic read yet |
+| `/checkout` | `app/checkout/page.js` | ◐ Partial Prerender | Static shell + one Suspense-wrapped `connection()` read |
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Full detail and reasoning in `STRATEGY.md`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Layouts
 
-## Learn More
+- `app/layout.js` — root layout, owns `<html>`/`<body>`, imports `globals.css`, renders `Header` and a footer
+- `app/menu/layout.js` — nested layout adding the category sidebar; proven to persist (stay mounted) when navigating from `/menu` to `/menu/kitfo` — only the right-hand content swaps
 
-To learn more about Next.js, take a look at the following resources:
+## Cache Components in Practice
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **`use cache`** — marks `getDishes()` in `lib/dishes.js` as cacheable
+- **`cacheLife("hours")`** — the cached menu data is valid for the built-in "hours" profile
+- **`cacheTag("dishes")`** — labels the cached menu data so it can be invalidated by name
+- **`revalidateTag("dishes", "max")`** — triggered by a demo button on the menu page (`simulateMenuPriceUpdate` server action); stale-while-revalidate, so the next visitor still gets the cached page instantly while Next.js regenerates it behind them
+- **`updateTag("cart")`** — triggered by "Add to Cart" on a dish page (`addToCart` server action); expires immediately, since the person who just acted should see their own change right away
+- **`connection()`** — forces the checkout timestamp to wait for the real request; must sit inside its own `<Suspense>` boundary, or the whole route fails to prerender (learned the hard way — see `STRATEGY.md`)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Streaming
 
-## Deploy on Vercel
+- `app/menu/loading.js` — skeleton cards shown for the whole `/menu` segment while it loads
+- A finer `<Suspense>` boundary inside `MenuPage` itself wraps just the `DishList` component (the part that actually reads data), so `CategoryBar` and the rest of the shell render immediately
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Verified
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run build` lists every expected route with the correct marker, and no extras
+- Navigating `/menu` → `/menu/kitfo` keeps the sidebar mounted (layout persistence)
+- `/menu/does-not-exist` shows "Dish not found"
+- `/checkout` shows a `Rendered at:` timestamp that changes on every request — proving the Partial Prerender's dynamic slice actually re-executes
+- Throttling the network briefly reveals the menu's skeleton loading state
