@@ -1,44 +1,47 @@
-# Day 37 — Layouts & Rendering Strategies
+# Day 38 — Server & Client Components
 
 Module 3 · Frontend: React & Next.js — IBT College Canada, CodeOps Full Stack Software Development program. Week 8.
 
-Built against Next.js 16's **Cache Components** model (`cacheComponents: true`), which supersedes the older `revalidate`/`dynamic` export API with `use cache`, `cacheLife`, `cacheTag`, `revalidateTag`, `updateTag`, and `connection()`.
+## What Today Covered
 
-## Route Table (verified with `npm run build`)
+The idea underneath the last two days: in the App Router, a component runs on the server unless told otherwise, ships no JavaScript, and can fetch data directly with no hook, no loading flag, and no API route in between.
 
-| Route | File | Marker | Strategy |
-|---|---|---|---|
-| `/` | `app/page.js` | ○ Static | Prebuilt once |
-| `/menu` | `app/menu/page.js` | ○ Static, revalidates hourly | `use cache` + `cacheLife("hours")` on `getDishes()` |
-| `/menu/[id]` | `app/menu/[id]/page.js` | ○ for known ids, ◐ fallback | `generateStaticParams()` prebuilds kitfo, pizza, burger |
-| `/cart` | `app/cart/page.js` | ○ Static | No dynamic read yet |
-| `/checkout` | `app/checkout/page.js` | ◐ Partial Prerender | Static shell + one Suspense-wrapped `connection()` read |
+## The Exercise: Before and After
 
-Full detail and reasoning in `STRATEGY.md`.
+Started from a deliberately over-clientized `/menu` page — `"use client"` at the top, `useState` + `useEffect` faking a fetch, and all the dish markup and cart logic bundled together, exactly the Day 26–34 Vite habit. Then sorted it properly:
 
-## Layouts
+- `app/menu/page.js` became a plain **async server component** — no directive, awaits `getDishes()` directly, reads `searchParams` as a prop
+- Only two client components remain, each the smallest piece that genuinely needs interactivity: `CategoryFilter.jsx` (holds the selected category) and `AddToCartButton.jsx` (holds its own count)
+- Full breakdown in `BOUNDARY.md`
 
-- `app/layout.js` — root layout, owns `<html>`/`<body>`, imports `globals.css`, renders `Header` and a footer
-- `app/menu/layout.js` — nested layout adding the category sidebar; proven to persist (stay mounted) when navigating from `/menu` to `/menu/kitfo` — only the right-hand content swaps
+## Bundle Measurement
 
-## Cache Components in Practice
+Measured `/menu`'s transferred JS in a production build (`npm run build && npm run start`), in an Incognito window with the Network tab's JS filter, to exclude browser extension noise.
 
-- **`use cache`** — marks `getDishes()` in `lib/dishes.js` as cacheable
-- **`cacheLife("hours")`** — the cached menu data is valid for the built-in "hours" profile
-- **`cacheTag("dishes")`** — labels the cached menu data so it can be invalidated by name
-- **`revalidateTag("dishes", "max")`** — triggered by a demo button on the menu page (`simulateMenuPriceUpdate` server action); stale-while-revalidate, so the next visitor still gets the cached page instantly while Next.js regenerates it behind them
-- **`updateTag("cart")`** — triggered by "Add to Cart" on a dish page (`addToCart` server action); expires immediately, since the person who just acted should see their own change right away
-- **`connection()`** — forces the checkout timestamp to wait for the real request; must sit inside its own `<Suspense>` boundary, or the whole route fails to prerender (learned the hard way — see `STRATEGY.md`)
+| | Transferred JS |
+|---|---|
+| Before (whole page client-rendered) | 141 kB |
+| After (sorted: server page + 2 small client leaves) | 141 kB |
 
-## Streaming
+**Honest finding: no measurable difference at this scale.** The ~141 kB is dominated by the shared React + Next.js client runtime (hydration machinery, the router, RSC payload parsing) that ships on every page regardless of component count. The difference between shipping 3 dish cards' worth of JS versus 0 is a few kilobytes at most — too small to register against a ~140 kB framework floor.
 
-- `app/menu/loading.js` — skeleton cards shown for the whole `/menu` segment while it loads
-- A finer `<Suspense>` boundary inside `MenuPage` itself wraps just the `DishList` component (the part that actually reads data), so `CategoryBar` and the rest of the shell render immediately
+This is a real and useful result, not a failed experiment: the server/client sort pays off as an application grows — more content, richer interactivity, heavier libraries — where the *avoided* client code becomes a meaningful fraction of the total. On a 3-dish demo it mostly buys architectural correctness (no fetching hook, no loading flag, data fetched where it lives) rather than a visible bundle win yet.
+
+## A Real Bug Found Along the Way
+
+Sorting the boundary surfaced an actual bug: the menu's sidebar (`app/menu/layout.js`) links to `/menu?category=ethiopian`, but `CategoryFilter`'s `useState` never read that query string — clicking a sidebar link changed the URL with no visible effect. Fixed by reading `searchParams` in the server page and passing it down as `CategoryFilter`'s initial state. The sidebar links and the in-page filter buttons are still two separate mechanisms — the buttons update only client state, not the URL — which is an intentional scope limit for this exercise, not something both were required to fully unify.
+
+## Key Concepts Applied
+
+- Server components are the default — no directive needed; they can be `async`, can read data directly, and ship zero JavaScript
+- Client components need `"use client"`, can hold state and handlers, but cannot be `async`
+- The directive marks a **boundary**, not a single file — everything imported beneath a `"use client"` file joins the client bundle, which is why it was pushed down to `CategoryFilter` and `AddToCartButton` specifically, not left on `page.js`
+- Only serializable values (strings, numbers, arrays, plain objects) can cross from server to client as props — functions cannot, which is why `MenuPage` passes `dishes` as data rather than any callback
+- `error.js` must be a client component because it needs state and a retry handler (`reset()`) — this is Next.js's own requirement, not a style choice
 
 ## Verified
 
-- `npm run build` lists every expected route with the correct marker, and no extras
-- Navigating `/menu` → `/menu/kitfo` keeps the sidebar mounted (layout persistence)
-- `/menu/does-not-exist` shows "Dish not found"
-- `/checkout` shows a `Rendered at:` timestamp that changes on every request — proving the Partial Prerender's dynamic slice actually re-executes
-- Throttling the network briefly reveals the menu's skeleton loading state
+- `npm run build` succeeds with the same route table as Day 37
+- The server-rendered HTML (view source) contains the full dish list and prices already present — not injected later by JavaScript
+- Exactly two files contain `"use client"` for genuinely interactive purposes (plus `error.js`, required by the framework)
+- Sidebar category links now correctly filter the menu on load
