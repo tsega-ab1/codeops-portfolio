@@ -8,6 +8,7 @@ const dishes = [
     price: 350,
     description: "Traditional Ethiopian minced beef dish.",
     emoji: "🥩",
+    category: "ethiopian",
   },
   {
     id: "pizza",
@@ -15,6 +16,7 @@ const dishes = [
     price: 500,
     description: "Freshly baked pizza with delicious toppings.",
     emoji: "🍕",
+    category: "pizza",
   },
   {
     id: "burger",
@@ -22,6 +24,7 @@ const dishes = [
     price: 400,
     description: "Juicy beef burger with fresh vegetables.",
     emoji: "🍔",
+    category: "burger",
   },
 ];
 
