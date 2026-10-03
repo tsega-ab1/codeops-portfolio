@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Day 41 — Data Fetching with SWR and TanStack Query
 
-## Getting Started
+Module 3 · Frontend: React & Next.js — CodeOps Full Stack Software Development.
 
-First, run the development server:
+## What Today Covered
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The question shifts from "which hook fetches this?" to "does this data need to be fetched in the browser at all?" Server Components handle data with no interaction; SWR and TanStack Query handle data that genuinely needs client-side caching, revalidation, polling, search, or pagination.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## What Was Built
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- **Home (`/`)** — Server Component, reads dish data directly, zero client JS for this data
+- **Menu search** — `SearchBox.js`, SWR + a custom `useDebounce` hook (300ms) + `keepPreviousData`, so typing doesn't fire a request per keystroke and old results don't flash empty between searches
+- **Pagination** — `PaginatedMenu.js`, the page number lives in both the URL-style key (`/api/dishes?page=N`) and component state, so each page is its own SWR cache entry
+- **Order status (`/orders/[id]`)** — server fetches the initial order and passes it to the client as `fallbackData`, so the page shows real data immediately with no loading flash, then SWR polls `refreshInterval: 5000` to keep it current
+- **Cart** — SWR + `mutate()` after a POST to refresh the cached list
+- **TanStack Query** — set up via a `Providers` client component wrapping `QueryClientProvider`; `AddToCartButton.js` demonstrates `useMutation` + `invalidateQueries(["cart"])` as the TanStack equivalent of SWR's `mutate()`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Full reasoning per feature in `DATA.md`.
 
-## Learn More
+## Key Concepts
 
-To learn more about Next.js, take a look at the following resources:
+- **SWR key** — identifies cached data; same key across components = same cache entry; `null` key = don't fetch yet
+- **TanStack queryKey** — the structured equivalent, e.g. `["dishes", page]`; enables targeted invalidation
+- **staleTime vs gcTime** — staleTime answers "how long is this still fresh," gcTime answers "how long does unused cached data stick around before being garbage collected" — different questions entirely
+- **fallbackData / initialData** — seeds a client hook with server-fetched data so the first render isn't an empty loading state
+- **Race conditions** — a slower, earlier request (e.g. "tib") could resolve after a faster, later one (e.g. "tibs") and incorrectly overwrite the screen; SWR and TanStack Query both coordinate this automatically
+- **Next.js 16 dynamic params are async** — `const { id } = await params;`, not the older direct-access pattern
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Verified
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Network tab confirms the search box does **not** fire a request per keystroke — only after a 300ms pause
+- Network tab confirms `/api/orders/1001` refires roughly every 5 seconds while the page is open
+- `page=1` and `page=2` produce distinct requests and distinct SWR cache entries
+- Adding "Special Tibs" to the cart updates the list without a manual page reload
