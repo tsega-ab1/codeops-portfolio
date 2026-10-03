@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useCart } from "@/context/CartContext";
 
-export default function AddToCartButton({ dish }) {
-  const [count, setCount] = useState(0);
+export default function AddToCartButton({ dishId }) {
+  const { addItem } = useCart();
 
   return (
-    <button className="primary-button" onClick={() => setCount(count + 1)}>
-      Add to Cart ({count})
+    <button className="primary-button" onClick={() => addItem(dishId)}>
+      Add to Cart
     </button>
   );
 }

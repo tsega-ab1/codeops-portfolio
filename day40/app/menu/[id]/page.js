@@ -1,5 +1,6 @@
+import { notFound } from "next/navigation";
 import { getDishes } from "../../../lib/dishes.js";
-import { addToCart } from "../../../lib/actions.js";
+import AddToCartButton from "../../../components/AddToCartButton.jsx";
 
 export async function generateStaticParams() {
   const dishes = await getDishes();
@@ -12,11 +13,7 @@ export default async function DishPage({ params }) {
   const dish = dishes.find((d) => d.id === id);
 
   if (!dish) {
-    return (
-      <div className="dish-detail">
-        <h1>Dish not found</h1>
-      </div>
-    );
+    notFound();
   }
 
   return (
@@ -26,11 +23,7 @@ export default async function DishPage({ params }) {
         <h1>{dish.name}</h1>
         <p className="dish-description">{dish.description}</p>
         <p className="dish-detail-price">{dish.price} ETB</p>
-        <form action={addToCart}>
-          <button className="primary-button" type="submit">
-            Add to Cart
-          </button>
-        </form>
+        <AddToCartButton dishId={dish.id} />
       </div>
     </main>
   );

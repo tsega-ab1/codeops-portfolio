@@ -1,14 +1,36 @@
-# Addis Eats — Rendering & Caching Strategy
+# Rendering Strategy
 
-| Route | Strategy | Why |
-|---|---|---|
-| `/` | Static | The hero content never changes between builds |
-| `/menu` | Cached (`use cache` + `cacheLife("hours")`) | Dishes change occasionally; speed matters most, tagged "dishes" so an admin update can invalidate just this |
-| `/menu/[id]` | Static via `generateStaticParams` | Every dish id is known at build time — one HTML file per dish |
-| `/cart` | Static (mock data for now) | No request-dependent read yet in this exercise |
-| `/checkout` | Dynamic (`connection()`) | Forced to render per-request — the line `await connection()` is the exact read that requires it, standing in for a real session/cookie read |
+## /
+Static. The home page is purely static content.
 
-## Cache invalidation
+## /menu
+Server-rendered, cached with `use cache` + `cacheLife("hours")`.
+The page fetches dish data directly on the server with no client
+fetching hook.
 
-- `simulateMenuPriceUpdate` (menu page button) calls `revalidateTag("dishes", "max")` — stale-while-revalidate: the next visitor still gets the cached page instantly while Next.js regenerates it behind them.
-- `addToCart` (dish page button) calls `updateTag("cart")` — expires immediately, because the person who just acted should see their own change right away.
+## /menu/[id]
+Prerendered dynamic route. `generateStaticParams()` provides the
+known dish IDs, so each dish gets its own static HTML file at build
+time. Calls `notFound()` for any unknown id, which renders the root
+`not-found.js`.
+
+## /cart
+Client-side interactive UI. Cart state is genuinely user/browser-
+specific, so it lives in a shared `CartContext` (client component),
+persisted to `localStorage`. The page itself (`app/cart/page.js`)
+stays a Server Component — only `CartClient.jsx` is client.
+
+## /checkout
+Server-side form mutation via a Server Action (`placeOrder` in
+`app/actions.js`), using `useActionState` for validation feedback
+and `useFormStatus` for the pending state.
+
+## /orders
+Static — reads the in-memory `orders` array populated by the
+checkout Server Action.
+
+## /api/dishes, /api/dishes/[id], /api/orders
+Dynamic Route Handlers — real HTTP endpoints, tested directly with
+curl independent of the UI. Exist because an external caller (not
+just our own UI) might need them; the menu/dish pages themselves
+fetch data directly via `getDishes()` rather than calling these.

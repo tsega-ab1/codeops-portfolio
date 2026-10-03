@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CartBadge from "./CartBadge";
 
 export default function Header() {
   return (
@@ -10,7 +11,7 @@ export default function Header() {
         <nav className="main-nav">
           <Link href="/">Home</Link>
           <Link href="/menu">Menu</Link>
-          <Link href="/cart">Cart</Link>
+          <CartBadge />
           <Link href="/checkout">Checkout</Link>
           <Link href="/orders">Orders</Link>
         </nav>
