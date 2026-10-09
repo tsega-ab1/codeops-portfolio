@@ -1,0 +1,15 @@
+:root { --ink: #14213d; --accent: #b3392b; --bg: #fffaf3; --line: #e5dccc; }
+body { background: var(--bg); color: var(--ink); line-height: 1.5; margin: 0; }
+a { color: var(--accent); }
+nav { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+nav form { margin-left: auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; padding: 0; list-style: none; }
+.card { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.card img { width: 100%; height: auto; display: block; }
+.card div { padding: 12px; }
+button, input { font: inherit; padding: 8px 12px; }
+button { cursor: pointer; }
+.error { color: #b00020; }
+.muted { color: #666; }
+table { border-collapse: collapse; width: 100%; }
+td, th { border-bottom: 1px solid var(--line); padding: 6px; text-align: left; }
