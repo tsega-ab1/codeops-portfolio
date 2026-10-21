@@ -51,7 +51,6 @@ Open-Meteo's API allows direct browser requests (CORS-enabled).
 sourced from national weather services (ECMWF, NOAA, DWD, and others).
 
 
-🎥 **Loom Project Demo:** [Watch the Project Demo](https://www.loom.com/share/fd6eb0e580f04777963fefb1c54a8437)
 
 🌐 **Live Hosted Application:** [View Bole Weather](https://tsega-ab1.github.io/codeops-portfolio/)
 
