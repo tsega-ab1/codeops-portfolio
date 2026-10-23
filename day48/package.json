@@ -1,0 +1,19 @@
+{
+  "name": "addis-eats-day48",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3048",
+    "build": "next build",
+    "start": "next start -p 3048"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "next": "^15.5.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-leaflet": "^5.0.0",
+    "recharts": "^3.10.1",
+    "swr": "^2.3.0"
+  }
+}
