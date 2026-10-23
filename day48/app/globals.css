@@ -19,3 +19,18 @@ td, th { border-bottom: 1px solid var(--line); padding: 6px; text-align: left; }
 .map-wrap { isolation: isolate; } /* keep Leaflet's z-indexes below your sticky nav */
 .map-pin { font-size: 28px; line-height: 36px; text-align: center; background: none; border: 0; }
 .live-indicator { font-size: .9rem; opacity: .8; }
+
+/* Day 48: keyboard focus + touch targets */
+:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+
+button,
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea { min-height: 44px; }
+button { min-width: 44px; }
+
+nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px; }
+td a, .card a { display: inline-flex; align-items: center; min-height: 44px; }
+
+button:disabled { cursor: not-allowed; opacity: .6; }
+button:active:not(:disabled) { transform: scale(.98); } /* instant tap feedback */

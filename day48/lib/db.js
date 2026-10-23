@@ -82,8 +82,15 @@ export function getKitchenOrdersAs(user) {
 
 /* ---------- writes (each one re-checks who is asking) ---------- */
 
-export async function createOrderAs(user, items) {
+export async function createOrderAs(user, items, idempotencyKey) {
   if (!user) return { ok: false, status: 401, error: "Not signed in" };
+
+  // A repeated request with the same key returns the original order, never a second one.
+  const key = typeof idempotencyKey === "string" && idempotencyKey.length <= 64 ? idempotencyKey : null;
+  if (key) {
+    const existing = db.orders.find((o) => o.userId === user.id && o.idempotencyKey === key);
+    if (existing) return { ok: true, order: existing, replayed: true };
+  }
   if (!Array.isArray(items) || items.length === 0 || items.length > 20) {
     return { ok: false, status: 400, error: "Your cart is empty or invalid" };
   }
@@ -100,6 +107,13 @@ export async function createOrderAs(user, items) {
     lines.push({ dishId: dish.id, name: dish.name, price: dish.price, qty });
   }
 
+  // Check again right before writing: the awaits above let a twin request slip past the first check.
+  // Nothing awaits between here and the push, so check-and-write cannot interleave.
+  if (key) {
+    const twin = db.orders.find((o) => o.userId === user.id && o.idempotencyKey === key);
+    if (twin) return { ok: true, order: twin, replayed: true };
+  }
+
   const order = {
     id: `ord_${db.nextOrder++}`,
     userId: user.id,
@@ -107,7 +121,8 @@ export async function createOrderAs(user, items) {
     items: lines,
     total: lines.reduce((sum, l) => sum + l.price * l.qty, 0),
     createdAt: new Date().toISOString(),
-    delivery: DEFAULT_DELIVERY
+    delivery: DEFAULT_DELIVERY,
+    idempotencyKey: key
   };
   db.orders.push(order);
   return { ok: true, order };

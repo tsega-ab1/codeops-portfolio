@@ -31,9 +31,9 @@ export async function signOut() {
   redirect("/");
 }
 
-export async function placeOrder(items) {
+export async function placeOrder(items, idempotencyKey) {
   const user = await getSession();
-  const result = await createOrderAs(user, items);
+  const result = await createOrderAs(user, items, idempotencyKey);
   if (!result.ok) return { ok: false, error: result.error };
 
   revalidatePath("/orders");
