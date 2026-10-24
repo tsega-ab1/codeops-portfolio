@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Run against `npm start` (or `npm run dev`) on port 3045.
-B=http://localhost:3045
+B=${B:-http://localhost:3048}
 tok() { node --env-file=.env.local scripts/token.mjs "$1"; }
-ALMAZ=$(tok usr_31); DAWIT=$(tok usr_32); STAFF=$(tok usr_10)
+ALMAZ=${ALMAZ:-$(tok usr_31)}; DAWIT=${DAWIT:-$(tok usr_32)}; STAFF=${STAFF:-$(tok usr_10)}
 code() { curl -s -o /dev/null -w '%{http_code}' "$@"; }
 J='Content-Type: application/json'
 
