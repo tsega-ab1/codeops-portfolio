@@ -32,6 +32,20 @@ Mini-project: **Harden, Then Ship** (Addis Eats, Next.js 15 App Router)
 | `SESSION_SECRET` | local value in `.env.local` | its own value | a different, strong value |
 | `SITE_URL` | `http://localhost:3048` | unset (falls back to the preview URL) | the production domain |
 
+## Post-deployment checks (live site)
+
+- robots.txt blocks /cart, /checkout, /orders, /kitchen, /signin and /api/
+- sitemap.xml lists only public pages, on the production host
+- Shared link renders as an Addis Eats card with the image (checked in Telegram)
+- Order page shows the map, live status and delivery text
+- Signed-out cancel is refused: 401
+- Dawit cancelling Almaz's order is refused: 403
+- Dawit reading Almaz's order or status: 404, same as a missing order
+- Signed-out and forged-cookie requests to /orders redirect to sign-in (307)
+- A customer changing an order status is refused: 403; signed out: 401; staff: 200
+- /kitchen shows "Not allowed" to a customer and the kitchen board to staff
+- Crafted sign-in redirects stay on the same site (attack 3)
+
 ## Keyboard and double-submit checks
 
 - Placed an order using only Tab, Enter and Escape.
