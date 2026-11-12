@@ -1,0 +1,86 @@
+@host = http://localhost:3000/api
+
+### list every order
+GET {{host}}/orders
+
+### one order
+GET {{host}}/orders/5
+
+### an order that does not exist (404)
+GET {{host}}/orders/999
+
+### create an order (201)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Sara Girma", "area": "Bole", "totalSantim": 24000, "phone": "0911234567" }
+
+### invalid total (400, not 500)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Sara Girma", "area": "Bole", "totalSantim": -5 }
+
+### extra field is stripped, not stored
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Sara Girma", "area": "Bole", "totalSantim": 24000, "isAdmin": true }
+
+### ---------------- restaurants ----------------
+
+### list restaurants
+GET {{host}}/restaurants
+
+### filter by area (two records, not four)
+GET {{host}}/restaurants?area=Bole
+
+### one restaurant
+GET {{host}}/restaurants/1
+
+### a restaurant that does not exist (404)
+GET {{host}}/restaurants/99
+
+### create a restaurant (201)
+POST {{host}}/restaurants
+Content-Type: application/json
+
+{ "name": "Sishu", "area": "Kazanchis" }
+
+### invalid area (400)
+POST {{host}}/restaurants
+Content-Type: application/json
+
+{ "name": "X Cafe", "area": "Adama" }
+
+### ---------------- dishes (the five calls) ----------------
+
+### 1 - list every dish
+GET {{host}}/dishes
+
+### 2 - one dish
+GET {{host}}/dishes/1
+
+### 2b - a dish that does not exist (404)
+GET {{host}}/dishes/99
+
+### 3 - only the dishes of restaurant 1
+GET {{host}}/dishes?restaurantId=1
+
+### 4 - create a dish (201)
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Gomen", "priceSantim": 15000, "restaurantId": 2 }
+
+### 5 - a dish for a restaurant that does not exist (400)
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Ghost Dish", "priceSantim": 15000, "restaurantId": 99 }
+
+### invalid price (400)
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Free Dish", "priceSantim": 0, "restaurantId": 1 }
