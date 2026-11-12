@@ -1,0 +1,28 @@
+@host = http://localhost:3000/api
+
+### list every order
+GET {{host}}/orders
+
+### one order
+GET {{host}}/orders/5
+
+### an order that does not exist (404)
+GET {{host}}/orders/999
+
+### create an order (201)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Sara Girma", "area": "Bole", "totalSantim": 24000, "phone": "0911234567" }
+
+### invalid total (400, not 500)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Sara Girma", "area": "Bole", "totalSantim": -5 }
+
+### extra field is stripped, not stored
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Sara Girma", "area": "Bole", "totalSantim": 24000, "isAdmin": true }
