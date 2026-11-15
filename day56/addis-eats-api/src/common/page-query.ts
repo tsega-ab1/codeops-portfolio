@@ -1,0 +1,18 @@
+import { Type } from "class-transformer";
+import { IsInt, IsOptional, Max, Min } from "class-validator";
+
+// The query-string part every collection shares: ?limit=10&offset=20
+export class PageQuery {
+  @IsOptional()
+  @Type(() => Number) // "10" arrives as a string; this turns it into 10
+  @IsInt()
+  @Min(1)
+  @Max(50) // a real defence: ?limit=1000000 would serialise the whole store
+  limit: number = 20;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  offset: number = 0;
+}

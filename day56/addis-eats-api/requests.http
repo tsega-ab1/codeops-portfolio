@@ -1,0 +1,124 @@
+@host = http://localhost:3000/api
+
+### ================= restaurants =================
+
+### 1 - paged list (Page<Restaurant>: items, total 4, limit 20, offset 0)
+GET {{host}}/restaurants
+
+### 2 - filter by area (2 records)
+GET {{host}}/restaurants?area=Bole
+
+### 3 - only open ones (3 records)
+GET {{host}}/restaurants?isOpen=true
+
+### 4 - only closed ones (1 record)
+GET {{host}}/restaurants?isOpen=false
+
+### 5 - paging: 2 items, total still 4
+GET {{host}}/restaurants?limit=2
+
+### 6 - the other two
+GET {{host}}/restaurants?limit=2&offset=2
+
+### 7 - limit over the cap (400)
+GET {{host}}/restaurants?limit=999
+
+### 8 - area not allowed (400)
+GET {{host}}/restaurants?area=Adama
+
+### 9 - static route above :id
+GET {{host}}/restaurants/open
+
+### 10 - one restaurant, bare object
+GET {{host}}/restaurants/1
+
+### 11 - the dishes of restaurant 1 (Page<Dish>)
+GET {{host}}/restaurants/1/dishes
+
+### 12 - restaurant that does not exist: 404, NOT an empty page
+GET {{host}}/restaurants/99/dishes
+
+### 13 - one dish of restaurant 1
+GET {{host}}/restaurants/1/dishes/1
+
+### 14 - dish 3 belongs to restaurant 2, so this pair is wrong (404)
+GET {{host}}/restaurants/1/dishes/3
+
+### ================= dishes =================
+
+### list (Page<Dish>, total 8)
+GET {{host}}/dishes
+
+### filtered by restaurant
+GET {{host}}/dishes?restaurantId=1
+
+### sorted by price
+GET {{host}}/dishes?sort=priceSantim&limit=3
+
+### create (201)
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Gomen", "priceSantim": 15000, "restaurantId": 2 }
+
+### restaurant that does not exist (400)
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Ghost Dish", "priceSantim": 15000, "restaurantId": 99 }
+
+### ================= orders: the twelve calls =================
+
+### 1 - paged list (Page<Order>, total 14)
+GET {{host}}/orders
+
+### 2 - limit=5 returns five
+GET {{host}}/orders?limit=5
+
+### 3 - page two: different five (ids 6 to 10)
+GET {{host}}/orders?limit=5&offset=5
+
+### 4 - filter by status (total 4)
+GET {{host}}/orders?status=PENDING
+
+### 5 - two filters together (Bole + DELIVERED: total 3)
+GET {{host}}/orders?area=Bole&status=DELIVERED
+
+### 6 - limit over the cap (400)
+GET {{host}}/orders?limit=999
+
+### 7 - static route above :id (only PENDING, total 4)
+GET {{host}}/orders/pending
+
+### 8 - the orders of restaurant 1 (total 4)
+GET {{host}}/restaurants/1/orders
+
+### 9 - restaurant that does not exist (404, not [])
+GET {{host}}/restaurants/99/orders
+
+### 10 - change the status (200, status is now PREPARING)
+PATCH {{host}}/orders/2/status
+Content-Type: application/json
+
+{ "status": "PREPARING" }
+
+### 11 - a status that is not in the union (400)
+PATCH {{host}}/orders/2/status
+Content-Type: application/json
+
+{ "status": "FLYING" }
+
+### 12 - delete (204, empty body)
+DELETE {{host}}/orders/6
+
+### 12b - delete it again (404)
+DELETE {{host}}/orders/6
+
+### one order, bare object
+GET {{host}}/orders/5
+
+### create (201) - needs a restaurantId that exists
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Sara Girma", "area": "Bole", "restaurantId": 1, "totalSantim": 24000 }
