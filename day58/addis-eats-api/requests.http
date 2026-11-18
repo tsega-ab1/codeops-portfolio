@@ -1,0 +1,170 @@
+@root = http://localhost:3000/api
+@host = http://localhost:3000/api/v1
+
+### ================= versioning =================
+
+### 200 - the versioned path
+GET {{host}}/restaurants
+
+### 404 - the unversioned path is gone
+GET {{root}}/restaurants
+
+### ================= restaurants =================
+
+### paged list (Page<Restaurant>, total 4)
+GET {{host}}/restaurants
+
+### the old /restaurants/open is a filter
+GET {{host}}/restaurants?isOpen=true
+
+### several areas at once, free-text search, descending sort
+GET {{host}}/restaurants?area=Bole,Piassa&q=a&sort=-name
+
+### one restaurant, bare object
+GET {{host}}/restaurants/1
+
+### create: 201 + Location
+POST {{host}}/restaurants
+Content-Type: application/json
+
+{ "name": "Sishu", "area": "Kazanchis" }
+
+### the dishes of restaurant 1
+GET {{host}}/restaurants/1/dishes
+
+### restaurant that does not exist: 404, NOT an empty page
+GET {{host}}/restaurants/99/dishes
+
+### ================= dishes =================
+
+### list (Page<Dish>, total 8)
+GET {{host}}/dishes
+
+### create: 201 + Location
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Gomen", "priceSantim": 15000, "restaurantId": 2 }
+
+### restaurant that does not exist (404)
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Ghost Dish", "priceSantim": 15000, "restaurantId": 99 }
+
+### price with a decimal (400, whole santim message)
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Gomen", "priceSantim": 240.5, "restaurantId": 2 }
+
+### ================= orders: reading =================
+
+### paged list (Page<Order>, total 14)
+GET {{host}}/orders
+
+### filters, several values, sort descending, fields
+GET {{host}}/orders?status=PENDING,PREPARING&sort=-totalSantim&fields=id,status,totalSantim&limit=4
+
+### one order, bare object
+GET {{host}}/orders/5
+
+### order that does not exist (404, five-field body)
+GET {{host}}/orders/99999
+
+### malformed id (400, same five-field body)
+GET {{host}}/orders/boom
+
+### the orders of restaurant 1
+GET {{host}}/restaurants/1/orders
+
+### delete: 204, and again: 204 (idempotent)
+DELETE {{host}}/orders/6
+
+### ================= orders: creating (the checkpoint calls) =================
+
+### 1 - valid order: 201 + Location, total computed by the server (64000)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "paymentMethod": "TELEBIRR", "phone": "0912345678", "lines": [{ "dishId": 1, "quantity": 2 }] }
+
+### 2 - phone with a wrong prefix (400, TeleBirr message)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "paymentMethod": "TELEBIRR", "phone": "0812345678", "lines": [{ "dishId": 1, "quantity": 2 }] }
+
+### 3 - lines empty (400, names lines)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "lines": [] }
+
+### 4 - a line without a dishId (400, names lines.0.dishId)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "lines": [{ "quantity": 2 }] }
+
+### 5 - undeclared field (400, names isAdmin)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "isAdmin": true, "lines": [{ "dishId": 1, "quantity": 2 }] }
+
+### 6 - the client names its own total (400, totalSantim should not exist)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "totalSantim": 1, "lines": [{ "dishId": 1, "quantity": 2 }] }
+
+### 7 - TeleBirr payment without a phone (400, cross-field rule)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "paymentMethod": "TELEBIRR", "lines": [{ "dishId": 1, "quantity": 2 }] }
+
+### 8 - restaurant does not exist (404)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 99, "lines": [{ "dishId": 1, "quantity": 2 }] }
+
+### 9 - restaurant is closed (409)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 3, "lines": [{ "dishId": 5, "quantity": 1 }] }
+
+### 10 - a dish from another restaurant's menu (422)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "lines": [{ "dishId": 3, "quantity": 1 }] }
+
+### ================= order status =================
+
+### legal move (200)
+PATCH {{host}}/orders/2/status
+Content-Type: application/json
+
+{ "status": "PREPARING" }
+
+### illegal move DELIVERED to PENDING (409)
+PATCH {{host}}/orders/5/status
+Content-Type: application/json
+
+{ "status": "PENDING" }
+
+### a status that is not in the union (400)
+PATCH {{host}}/orders/2/status
+Content-Type: application/json
+
+{ "status": "FLYING" }
+
+### order that does not exist (404)
+PATCH {{host}}/orders/99999/status
+Content-Type: application/json
+
+{ "status": "PREPARING" }
