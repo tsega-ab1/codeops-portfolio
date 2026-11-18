@@ -1,0 +1,154 @@
+@root = http://localhost:3000/api
+@host = http://localhost:3000/api/v1
+
+### ================= versioning =================
+
+### 200 - the versioned path
+GET {{host}}/restaurants
+
+### 404 - the unversioned path is gone
+GET {{root}}/restaurants
+
+### ================= restaurants =================
+
+### paged list (Page<Restaurant>, total 4)
+GET {{host}}/restaurants
+
+### filter by area
+GET {{host}}/restaurants?area=Bole
+
+### several areas at once (comma separated)
+GET {{host}}/restaurants?area=Bole,Piassa
+
+### the old /restaurants/open is now a filter
+GET {{host}}/restaurants?isOpen=true
+
+### closed ones
+GET {{host}}/restaurants?isOpen=false
+
+### free-text search on name
+GET {{host}}/restaurants?q=abyss
+
+### sort descending (leading minus)
+GET {{host}}/restaurants?sort=-name
+
+### limit over the cap (400)
+GET {{host}}/restaurants?limit=999
+
+### area not allowed (400)
+GET {{host}}/restaurants?area=Adama
+
+### one restaurant, bare object
+GET {{host}}/restaurants/1
+
+### create: 201 + Location: /api/v1/restaurants/5
+POST {{host}}/restaurants
+Content-Type: application/json
+
+{ "name": "Sishu", "area": "Kazanchis" }
+
+### the dishes of restaurant 1
+GET {{host}}/restaurants/1/dishes
+
+### restaurant that does not exist: 404, NOT an empty page
+GET {{host}}/restaurants/99/dishes
+
+### one dish of restaurant 1
+GET {{host}}/restaurants/1/dishes/1
+
+### dish 3 belongs to restaurant 2, so this pair is wrong (404)
+GET {{host}}/restaurants/1/dishes/3
+
+### ================= dishes =================
+
+### list (Page<Dish>, total 8)
+GET {{host}}/dishes
+
+### filtered by restaurant
+GET {{host}}/dishes?restaurantId=1
+
+### sorted by price, most expensive first
+GET {{host}}/dishes?sort=-priceSantim&limit=3
+
+### search
+GET {{host}}/dishes?q=wat
+
+### create: 201 + Location: /api/v1/dishes/9
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Gomen", "priceSantim": 15000, "restaurantId": 2 }
+
+### restaurant that does not exist (400, no Location)
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Ghost Dish", "priceSantim": 15000, "restaurantId": 99 }
+
+### ================= orders =================
+
+### paged list (Page<Order>, total 14)
+GET {{host}}/orders
+
+### the old /orders/pending is now a filter (total 4)
+GET {{host}}/orders?status=PENDING
+
+### several statuses at once (total 7)
+GET {{host}}/orders?status=PENDING,PREPARING
+
+### two filters together
+GET {{host}}/orders?area=Bole&status=DELIVERED
+
+### sort descending: biggest order first (ids 11, 7, 14, 4)
+GET {{host}}/orders?sort=-totalSantim&limit=4
+
+### several sort keys: by area, then biggest first
+GET {{host}}/orders?sort=area,-totalSantim
+
+### sort field that does not exist (400)
+GET {{host}}/orders?sort=-bogus
+
+### paging
+GET {{host}}/orders?limit=5&offset=5
+
+### limit over the cap (400)
+GET {{host}}/orders?limit=999
+
+### fields: the same five orders, a much smaller response
+GET {{host}}/orders?limit=5&fields=id,status,totalSantim
+
+### a field that is not on the record (400)
+GET {{host}}/orders?fields=id,password
+
+### the orders of restaurant 1
+GET {{host}}/restaurants/1/orders
+
+### restaurant that does not exist (404, not [])
+GET {{host}}/restaurants/99/orders
+
+### one order, bare object
+GET {{host}}/orders/5
+
+### create: 201 + Location: /api/v1/orders/15
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Sara Girma", "area": "Bole", "restaurantId": 1, "totalSantim": 24000 }
+
+### change the status (200)
+PATCH {{host}}/orders/2/status
+Content-Type: application/json
+
+{ "status": "PREPARING" }
+
+### a status that is not in the union (400)
+PATCH {{host}}/orders/2/status
+Content-Type: application/json
+
+{ "status": "FLYING" }
+
+### delete: 204, empty body
+DELETE {{host}}/orders/6
+
+### delete AGAIN: 204 again (idempotent)
+DELETE {{host}}/orders/6
