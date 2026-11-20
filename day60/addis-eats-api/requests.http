@@ -1,0 +1,163 @@
+@root = http://localhost:3000/api
+@host = http://localhost:3000/api/v1
+@staffKey = staff-dev-key-change-me
+@customerKey = customer-dev-key-change-me
+
+### ================= Day 59: the twelve calls =================
+
+### 1 - every response carries an x-request-id header (a uuid)
+GET {{host}}/orders?limit=1
+
+### 2 - a caller's own id is echoed unchanged (mine-123)
+GET {{host}}/orders?limit=1
+x-request-id: mine-123
+
+### 3 - the same id appears in the error body's requestId
+GET {{host}}/orders/99999
+x-request-id: mine-123
+
+### 4 - no key on a staff route: 401, naming the header
+DELETE {{host}}/orders/6
+
+### 5 - a wrong key: 403
+DELETE {{host}}/orders/6
+x-api-key: wrong
+
+### 6 - a customer key on a staff route: 403 (requires the role: staff)
+DELETE {{host}}/orders/6
+x-api-key: {{customerKey}}
+
+### 7 - the staff key: 204
+DELETE {{host}}/orders/6
+x-api-key: {{staffKey}}
+
+### 8 - the area pipe normalises: Bole
+GET {{host}}/delivery-fees?area=bole
+
+### 9 - same, upper case: Bole
+GET {{host}}/delivery-fees?area=BOLE
+
+### 10 - not an area: 400
+GET {{host}}/delivery-fees?area=adama
+
+### 11 - a fast handler: 200 after about one second
+GET {{host}}/debug/slow?ms=1000
+x-api-key: {{staffKey}}
+
+### 12 - a six-second handler: 408 after five seconds, five-field body
+GET {{host}}/debug/slow?ms=6000
+x-api-key: {{staffKey}}
+
+### ================= versioning =================
+
+### 200 - the versioned path
+GET {{host}}/restaurants
+
+### 404 - the unversioned path is gone
+GET {{root}}/restaurants
+
+### ================= restaurants =================
+
+### paged list (Page<Restaurant>, total 4)
+GET {{host}}/restaurants
+
+### several areas at once, free-text search, descending sort
+GET {{host}}/restaurants?area=Bole,Piassa&q=a&sort=-name
+
+### one restaurant, bare object
+GET {{host}}/restaurants/1
+
+### create: 201 + Location
+POST {{host}}/restaurants
+Content-Type: application/json
+
+{ "name": "Sishu", "area": "Kazanchis" }
+
+### the dishes of restaurant 1
+GET {{host}}/restaurants/1/dishes
+
+### restaurant that does not exist: 404, NOT an empty page
+GET {{host}}/restaurants/99/dishes
+
+### ================= dishes =================
+
+### list (Page<Dish>, total 8)
+GET {{host}}/dishes
+
+### create: 201 + Location
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Gomen", "priceSantim": 15000, "restaurantId": 2 }
+
+### restaurant that does not exist (404)
+POST {{host}}/dishes
+Content-Type: application/json
+
+{ "name": "Ghost Dish", "priceSantim": 15000, "restaurantId": 99 }
+
+### ================= orders: reading =================
+
+### paged list (Page<Order>, total 14)
+GET {{host}}/orders
+
+### filters, several values, sort descending, fields
+GET {{host}}/orders?status=PENDING,PREPARING&sort=-totalSantim&fields=id,status,totalSantim&limit=4
+
+### one order, bare object
+GET {{host}}/orders/5
+
+### order that does not exist (404, five-field body)
+GET {{host}}/orders/99999
+
+### the orders of restaurant 1
+GET {{host}}/restaurants/1/orders
+
+### ================= orders: creating (open to customers) =================
+
+### valid order: 201 + Location, total computed by the server (64000)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "paymentMethod": "TELEBIRR", "phone": "0912345678", "lines": [{ "dishId": 1, "quantity": 2 }] }
+
+### phone with a wrong prefix (400)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "paymentMethod": "TELEBIRR", "phone": "0812345678", "lines": [{ "dishId": 1, "quantity": 2 }] }
+
+### restaurant is closed (409)
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 3, "lines": [{ "dishId": 5, "quantity": 1 }] }
+
+### ================= order status (staff only) =================
+
+### legal move (200)
+PATCH {{host}}/orders/2/status
+Content-Type: application/json
+x-api-key: {{staffKey}}
+
+{ "status": "PREPARING" }
+
+### illegal move DELIVERED to PENDING (409)
+PATCH {{host}}/orders/5/status
+Content-Type: application/json
+x-api-key: {{staffKey}}
+
+{ "status": "PENDING" }
+
+### no key: 401
+PATCH {{host}}/orders/2/status
+Content-Type: application/json
+
+{ "status": "PREPARING" }
+
+### a status that is not in the union (400)
+PATCH {{host}}/orders/2/status
+Content-Type: application/json
+x-api-key: {{staffKey}}
+
+{ "status": "FLYING" }
