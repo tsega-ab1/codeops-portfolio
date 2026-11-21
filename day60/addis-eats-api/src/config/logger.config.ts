@@ -44,6 +44,10 @@ export function loggerConfig(config: ConfigService): Params {
       customLogLevel: (_req, res, err) =>
         err || res.statusCode >= 500 ? "error" : res.statusCode >= 400 ? "warn" : "info",
 
+      // The interceptor leaves the handler's name on the request; add it to the finished line
+      customProps: (req) =>
+        "handlerName" in req ? { handler: String(req.handlerName) } : {},
+
       // the Swagger page fetches many assets: keep them out of the log
       autoLogging: { ignore: (req) => (req.url ?? "").startsWith("/docs") },
 

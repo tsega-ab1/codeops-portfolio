@@ -119,3 +119,11 @@ One page. The API follows it. When the two disagree, one of them is wrong and ge
 - A route declares who may use it with `@Roles("staff")`. Customers may place and read orders. Only staff may change an order's status or cancel it.
 - In week 12 a JWT guard replaces the key lookup and puts a real user on the request. The roles check does not change.
 - `/api/v1/debug/*` exists in development only (it is not mounted when `NODE_ENV=production`) and is not part of the contract.
+
+## 8. Logs and documentation
+- **Logs are structured JSON, one object per line, written to stdout.** The application never opens a log file: whatever runs it collects stdout. The level comes from the `LOG_LEVEL` environment variable (`error`, `warn`, `info`, `debug`, `verbose`); production runs at `info`.
+- **Every line a request writes carries its `requestId`** (and the `handler` that answered), including lines written by services, which are never passed the id.
+- **The level says who acts:** `error` is our bug (a 5xx), `warn` is the caller's mistake and worth a look this week (a 4xx), `info` is a fact worth keeping, `debug` is detail for diagnosing and is off in production.
+- **Never logged:** passwords, tokens, API keys, whole phone numbers, whole request bodies. The logger censors `authorization`, `x-api-key`, `cookie`, `password`, `phone` and `telebirrPhone` wherever they appear, so no call site has to remember.
+- **The API documents itself.** A browsable, callable page is served at `/docs` and the raw OpenAPI document at `/docs-json`, in every environment except production. Every endpoint has a summary, and every failure code it can return is documented.
+- **`openapi.json` is committed** and regenerated with `npm run export:openapi`. A pull request that changes the API also changes this file, so a breaking change shows up in the diff.

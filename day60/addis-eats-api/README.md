@@ -41,3 +41,10 @@ Reserved names, never to be used as a field: **`limit`, `offset`, `sort`, `field
 - **Guards run before pipes:** a caller who is about to be refused should not have their body parsed first.
 - The API keys are scaffolding. In week 12 a JWT guard takes their place and `RolesGuard` does not change.
 - The log line looks like `GET /api/v1/orders -> OrdersController.findAll ok 4ms [<request id>]` and is written by the interceptor, so requests refused by a guard (401, 403) or that match no route (404) do not get one.
+
+### Logs and documentation (Day 60)
+- **Structured JSON logs on stdout** (pino). The level is `LOG_LEVEL` in `.env`. `NODE_ENV=development` switches to readable output; or pipe: `npm run start:dev | npx pino-pretty`.
+- **One request, one story:** every line carries `requestId`. Read a single request with `grep '"requestId":"<id>"' server.log`.
+- **Redaction lives in `src/config/logger.config.ts`**, in one list, not at forty call sites.
+- **Swagger at `/docs`** (not in production), raw spec at `/docs-json`, `openapi.json` committed. Regenerate it with `npm run export:openapi` after any change to the API.
+- Checks: `bash check-logs.sh` (needs `npm run build`) and `bash check-d60.sh` (with the dev server running).
