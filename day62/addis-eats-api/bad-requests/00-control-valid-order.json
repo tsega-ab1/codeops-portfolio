@@ -1,0 +1,1 @@
+{ "customer": "Almaz Bekele", "area": "Bole", "restaurantId": 1, "paymentMethod": "TELEBIRR", "phone": "0912345678", "lines": [{ "dishId": 1, "quantity": 2 }] }
