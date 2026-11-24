@@ -1,0 +1,1711 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/orders": {
+      "get": {
+        "description": "Filter by status and area (several values each), sort by one or more fields, page with limit and offset, and shrink the response with `fields`. `total` counts every match, before paging.",
+        "operationId": "OrdersController_findAll_v1",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Only these statuses, several allowed: `PENDING,PREPARING`.",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "PREPARING",
+                "ON_THE_WAY",
+                "DELIVERED",
+                "CANCELLED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "area",
+            "required": false,
+            "in": "query",
+            "description": "Only these delivery areas, several allowed: `Bole,Piassa`.",
+            "schema": {
+              "enum": [
+                "Bole",
+                "Kazanchis",
+                "Piassa",
+                "Megenagna"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": true,
+            "in": "query",
+            "description": "Sort by id, customer, area or totalSantim. A leading minus means descending, several allowed: `area,-totalSantim`.",
+            "schema": {
+              "default": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "required": false,
+            "in": "query",
+            "description": "Keep only these keys of each order, to shrink the response: `id,status,totalSantim`.",
+            "schema": {
+              "enum": [
+                "id",
+                "customer",
+                "area",
+                "status",
+                "restaurantId",
+                "paymentMethod",
+                "dishes",
+                "telebirrPhone",
+                "totalSantim"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "description": "How many items to skip, for the next page.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OrderResponse"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 14,
+                      "description": "How many rows matched, counted before paging."
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "example": 20
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A query parameter is not allowed: limit over 50, an unknown status, area, sort field or field name.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List orders, filtered, sorted and paged",
+        "tags": [
+          "orders"
+        ]
+      },
+      "post": {
+        "description": "Send the lines, not a total: the server prices the order from the menu. The checks run in a fixed order: the restaurant exists (404), it is open (409), every dish is on its menu (422), then the order is priced and saved.",
+        "operationId": "OrdersController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The order was created. The Location header points at it.",
+            "headers": {
+              "Location": {
+                "description": "Where the new order lives, for example /api/v1/orders/15",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed: a field is missing or malformed, an undeclared field was sent (including totalSantim), lines is empty, or paymentMethod is TELEBIRR without a phone.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The restaurant does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The restaurant is closed and is not taking orders.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A dish in the lines is not on that restaurant's menu.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Place an order",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/orders/{id}": {
+      "get": {
+        "operationId": "OrdersController_findOne_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The id is not a whole number.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No order has that id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get one order by id",
+        "tags": [
+          "orders"
+        ]
+      },
+      "delete": {
+        "description": "Idempotent: deleting an order that is already gone, or never existed, is still a 204.",
+        "operationId": "OrdersController_cancel_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Done. The body is empty."
+          },
+          "400": {
+            "description": "The id is not a whole number.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No x-api-key header was sent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is wrong, or it belongs to a caller who is not staff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Cancel (delete) an order (staff only)",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/orders/{id}/status": {
+      "patch": {
+        "description": "Only legal moves are accepted: PENDING to PREPARING or CANCELLED, PREPARING to ON_THE_WAY or CANCELLED, ON_THE_WAY to DELIVERED. DELIVERED and CANCELLED are final.",
+        "operationId": "OrdersController_updateStatus_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The id is not a whole number, or status is not one of the five statuses.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No x-api-key header was sent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is wrong, or it belongs to a caller who is not staff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No order has that id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The order's current status does not allow that move.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Move an order to its next status (staff only)",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/restaurants/{restaurantId}/orders": {
+      "get": {
+        "description": "Takes the same filters, sorting, paging and `fields` as the general order list. A restaurant that does not exist is a 404, never an empty page.",
+        "operationId": "RestaurantOrdersController_findAll_v1",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Only these statuses, several allowed: `PENDING,PREPARING`.",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "PREPARING",
+                "ON_THE_WAY",
+                "DELIVERED",
+                "CANCELLED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "area",
+            "required": false,
+            "in": "query",
+            "description": "Only these delivery areas, several allowed: `Bole,Piassa`.",
+            "schema": {
+              "enum": [
+                "Bole",
+                "Kazanchis",
+                "Piassa",
+                "Megenagna"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": true,
+            "in": "query",
+            "description": "Sort by id, customer, area or totalSantim. A leading minus means descending, several allowed: `area,-totalSantim`.",
+            "schema": {
+              "default": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "required": false,
+            "in": "query",
+            "description": "Keep only these keys of each order, to shrink the response: `id,status,totalSantim`.",
+            "schema": {
+              "enum": [
+                "id",
+                "customer",
+                "area",
+                "status",
+                "restaurantId",
+                "paymentMethod",
+                "dishes",
+                "telebirrPhone",
+                "totalSantim"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "description": "How many items to skip, for the next page.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of that restaurant's orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OrderResponse"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 14,
+                      "description": "How many rows matched, counted before paging."
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "example": 20
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The restaurant id is not a whole number, or a query parameter is not allowed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No restaurant has that id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List the orders of one restaurant",
+        "tags": [
+          "restaurants",
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/delivery-fees": {
+      "get": {
+        "description": "The area may be sent in any letter case (`bole`, `BOLE`); the answer uses the canonical spelling.",
+        "operationId": "DeliveryFeesController_find_v1",
+        "parameters": [
+          {
+            "name": "area",
+            "required": true,
+            "in": "query",
+            "description": "A delivery area, any letter case.",
+            "schema": {
+              "enum": [
+                "Bole",
+                "Kazanchis",
+                "Piassa",
+                "Megenagna"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryFeeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The area is missing, or is not one of the four delivery areas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "What delivery costs in one area",
+        "tags": [
+          "delivery-fees"
+        ]
+      }
+    },
+    "/api/v1/restaurants": {
+      "get": {
+        "description": "Closed restaurants are included: check `isOpen`, or filter with `isOpen=true`.",
+        "operationId": "RestaurantsController_findAll_v1",
+        "parameters": [
+          {
+            "name": "area",
+            "required": false,
+            "in": "query",
+            "description": "Only restaurants in these areas, several allowed: `Bole,Piassa`.",
+            "schema": {
+              "enum": [
+                "Bole",
+                "Kazanchis",
+                "Piassa",
+                "Megenagna"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "isOpen",
+            "required": false,
+            "in": "query",
+            "description": "`true` for restaurants taking orders now, `false` for closed ones.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Text to look for in the name, case-insensitive: `abyss`.",
+            "schema": {
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": true,
+            "in": "query",
+            "description": "Sort by name or area. A leading minus means descending: `-name`.",
+            "schema": {
+              "default": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "description": "How many items to skip, for the next page.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of restaurants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RestaurantResponse"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 14,
+                      "description": "How many rows matched, counted before paging."
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "example": 20
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A query parameter is not allowed: limit over 50, an unknown area or sort field, isOpen that is not true or false.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List restaurants, filtered, searched, sorted and paged",
+        "tags": [
+          "restaurants"
+        ]
+      },
+      "post": {
+        "operationId": "RestaurantsController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRestaurantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The restaurant was created. The Location header points at it.",
+            "headers": {
+              "Location": {
+                "description": "Where the new restaurant lives, for example /api/v1/restaurants/5",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed: a field is missing or malformed, or an undeclared field was sent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Add a restaurant",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v1/restaurants/{id}": {
+      "get": {
+        "operationId": "RestaurantsController_findOne_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The id is not a whole number.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No restaurant has that id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get one restaurant by id",
+        "tags": [
+          "restaurants"
+        ]
+      }
+    },
+    "/api/v1/dishes": {
+      "get": {
+        "description": "Prices are whole santim. Use `restaurantId` to see one menu.",
+        "operationId": "DishesController_findAll_v1",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": false,
+            "in": "query",
+            "description": "Only the dishes of this restaurant.",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Text to look for in the dish name, case-insensitive: `wat`.",
+            "schema": {
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": true,
+            "in": "query",
+            "description": "Sort by name or priceSantim. A leading minus means descending: `-priceSantim`.",
+            "schema": {
+              "default": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "description": "How many items to skip, for the next page.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of dishes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DishResponse"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 14,
+                      "description": "How many rows matched, counted before paging."
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "example": 20
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A query parameter is not allowed: limit over 50, restaurantId that is not a whole number, an unknown sort field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List dishes across all menus, searched, sorted and paged",
+        "tags": [
+          "dishes"
+        ]
+      },
+      "post": {
+        "operationId": "DishesController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDishDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The dish was created. The Location header points at it.",
+            "headers": {
+              "Location": {
+                "description": "Where the new dish lives, for example /api/v1/dishes/9",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DishResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed: a field is missing or malformed, the price is not a whole number of santim between 1 and 10,000,000, or an undeclared field was sent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The restaurant does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Add a dish to a restaurant's menu",
+        "tags": [
+          "dishes"
+        ]
+      }
+    },
+    "/api/v1/dishes/{id}": {
+      "get": {
+        "operationId": "DishesController_findOne_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DishResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The id is not a whole number.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No dish has that id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get one dish by id",
+        "tags": [
+          "dishes"
+        ]
+      }
+    },
+    "/api/v1/restaurants/{restaurantId}/dishes": {
+      "get": {
+        "description": "A restaurant that does not exist is a 404, never an empty page.",
+        "operationId": "RestaurantDishesController_findAll_v1",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Text to look for in the dish name, case-insensitive: `wat`.",
+            "schema": {
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": true,
+            "in": "query",
+            "description": "Sort by name or priceSantim. A leading minus means descending: `-priceSantim`.",
+            "schema": {
+              "default": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "description": "How many items to return, 1 to 50.",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "description": "How many items to skip, for the next page.",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of that restaurant's dishes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DishResponse"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 14,
+                      "description": "How many rows matched, counted before paging."
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "example": 20
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The restaurant id is not a whole number, or a query parameter is not allowed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No restaurant has that id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List one restaurant's menu",
+        "tags": [
+          "restaurants",
+          "dishes"
+        ]
+      }
+    },
+    "/api/v1/restaurants/{restaurantId}/dishes/{dishId}": {
+      "get": {
+        "description": "Both ids must be valid AND belong together: dish 3 is on restaurant 2's menu, so asking for it under restaurant 1 is a 404.",
+        "operationId": "RestaurantDishesController_findOne_v1",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "dishId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DishResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An id is not a whole number.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such restaurant, or that dish is not on this restaurant's menu.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get one dish of one restaurant",
+        "tags": [
+          "restaurants",
+          "dishes"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Addis Eats API",
+    "description": "Food delivery for Addis Ababa.\n\n**Money is in santim, not birr.** 24000 santim is 240.00 ETB. Prices and totals are always whole numbers.\n**Phone numbers are TeleBirr numbers:** `09xxxxxxxx` or `+2519xxxxxxxx`.\n\n**Orders are priced by the server.** You send the lines (a dish and a quantity); the total is computed from the menu. Sending a `totalSantim` is rejected.\n\n**Every error has the same five fields:** `statusCode`, `message`, `path`, `timestamp`, `requestId`. Quote the `x-request-id` response header (it is the same id) when you report a problem.\nA request that takes longer than 5 seconds answers **408**, and an unexpected failure answers **500** with a generic message.\n\n**Staff routes** (changing an order's status, cancelling an order) need the `x-api-key` header. Click **Authorize** and paste a staff key. Everything else is open.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "restaurants",
+      "description": "Kitchens that take orders"
+    },
+    {
+      "name": "dishes",
+      "description": "Items on a restaurant menu"
+    },
+    {
+      "name": "orders",
+      "description": "Customer orders and their status"
+    },
+    {
+      "name": "delivery-fees",
+      "description": "What delivery costs in each area"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "x-api-key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key",
+        "description": "Staff key. Temporary until week 12."
+      }
+    },
+    "schemas": {
+      "OrderItemResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Doro Wat"
+          },
+          "priceSantim": {
+            "type": "number",
+            "example": 32000,
+            "description": "Whole santim. 32000 is 320.00 ETB."
+          }
+        },
+        "required": [
+          "name",
+          "priceSantim"
+        ]
+      },
+      "OrderResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 15
+          },
+          "customer": {
+            "type": "string",
+            "example": "Almaz Bekele"
+          },
+          "area": {
+            "type": "string",
+            "enum": [
+              "Bole",
+              "Kazanchis",
+              "Piassa",
+              "Megenagna"
+            ],
+            "example": "Bole",
+            "description": "The delivery area."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PREPARING",
+              "ON_THE_WAY",
+              "DELIVERED",
+              "CANCELLED"
+            ],
+            "example": "PENDING"
+          },
+          "restaurantId": {
+            "type": "number",
+            "example": 1,
+            "description": "The restaurant cooking the order."
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "CASH",
+              "TELEBIRR"
+            ],
+            "example": "TELEBIRR"
+          },
+          "dishes": {
+            "description": "One entry per unit ordered: two lines of Doro Wat appear twice.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemResponse"
+            }
+          },
+          "telebirrPhone": {
+            "type": "string",
+            "example": "0912345678",
+            "description": "The TeleBirr number the customer gave, if any."
+          },
+          "totalSantim": {
+            "type": "number",
+            "example": 64000,
+            "description": "Whole santim, computed by the server from the dishes. 64000 is 640.00 ETB."
+          }
+        },
+        "required": [
+          "id",
+          "customer",
+          "area",
+          "status",
+          "restaurantId",
+          "paymentMethod",
+          "dishes",
+          "totalSantim"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 404,
+            "description": "The HTTP status code."
+          },
+          "message": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "example": "Order 99999 was not found",
+            "description": "What went wrong. An array of strings for validation, one per broken rule, each naming its field."
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/orders/99999",
+            "description": "The path that was requested."
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-11-20T09:30:00.000Z",
+            "description": "When the error happened (ISO 8601, UTC)."
+          },
+          "requestId": {
+            "type": "string",
+            "example": "3f0c8c1e-6a52-4c2b-9d0e-2f6a5b7c1d11",
+            "description": "The request id: the same value as the x-request-id response header."
+          }
+        },
+        "required": [
+          "statusCode",
+          "message",
+          "path",
+          "timestamp",
+          "requestId"
+        ]
+      },
+      "OrderLineDto": {
+        "type": "object",
+        "properties": {
+          "dishId": {
+            "type": "number",
+            "description": "A dish id. The dish must be on the menu of the restaurant being ordered from.",
+            "minimum": 1,
+            "example": 1
+          },
+          "quantity": {
+            "type": "number",
+            "description": "How many of it, 1 to 20.",
+            "minimum": 1,
+            "maximum": 20,
+            "example": 2
+          }
+        },
+        "required": [
+          "dishId",
+          "quantity"
+        ]
+      },
+      "CreateOrderDto": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "string",
+            "description": "The customer's full name, as they gave it.",
+            "minLength": 2,
+            "maxLength": 80,
+            "example": "Almaz Bekele"
+          },
+          "area": {
+            "type": "string",
+            "description": "One of the four Addis Ababa delivery areas.",
+            "enum": [
+              "Bole",
+              "Kazanchis",
+              "Piassa",
+              "Megenagna"
+            ],
+            "example": "Bole"
+          },
+          "restaurantId": {
+            "type": "number",
+            "description": "The restaurant to order from. It must exist (404) and be open (409).",
+            "minimum": 1,
+            "example": 1
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "How the customer pays. TELEBIRR requires a phone number. Defaults to CASH.",
+            "default": "CASH",
+            "enum": [
+              "CASH",
+              "TELEBIRR"
+            ],
+            "example": "TELEBIRR"
+          },
+          "phone": {
+            "type": "string",
+            "description": "TeleBirr number: `09xxxxxxxx` or `+2519xxxxxxxx`. Required when paymentMethod is TELEBIRR.",
+            "example": "0912345678"
+          },
+          "lines": {
+            "description": "What is being ordered: at least one line. The total is computed from these, never sent.",
+            "minItems": 1,
+            "example": [
+              {
+                "dishId": 1,
+                "quantity": 2
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineDto"
+            }
+          }
+        },
+        "required": [
+          "customer",
+          "area",
+          "restaurantId",
+          "lines"
+        ]
+      },
+      "UpdateStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "The status to move to. Only legal moves are accepted, anything else is a 409.",
+            "enum": [
+              "PENDING",
+              "PREPARING",
+              "ON_THE_WAY",
+              "DELIVERED",
+              "CANCELLED"
+            ],
+            "example": "PREPARING"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "DeliveryFeeResponse": {
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": "string",
+            "enum": [
+              "Bole",
+              "Kazanchis",
+              "Piassa",
+              "Megenagna"
+            ],
+            "example": "Bole",
+            "description": "The area in its canonical spelling, whatever letter case was sent."
+          },
+          "feeSantim": {
+            "type": "number",
+            "example": 4000,
+            "description": "Whole santim. 4000 is 40.00 ETB."
+          }
+        },
+        "required": [
+          "area",
+          "feeSantim"
+        ]
+      },
+      "RestaurantResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Yod Abyssinia"
+          },
+          "area": {
+            "type": "string",
+            "enum": [
+              "Bole",
+              "Kazanchis",
+              "Piassa",
+              "Megenagna"
+            ],
+            "example": "Bole"
+          },
+          "isOpen": {
+            "type": "boolean",
+            "example": true,
+            "description": "Closed restaurants still appear in lists. Check this before offering a menu: placing an order with a closed restaurant answers 409."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "area",
+          "isOpen"
+        ]
+      },
+      "CreateRestaurantDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The restaurant's name, 2 to 80 characters.",
+            "minLength": 2,
+            "maxLength": 80,
+            "example": "Sishu"
+          },
+          "area": {
+            "type": "string",
+            "description": "The area the restaurant is in.",
+            "enum": [
+              "Bole",
+              "Kazanchis",
+              "Piassa",
+              "Megenagna"
+            ],
+            "example": "Kazanchis"
+          },
+          "isOpen": {
+            "type": "boolean",
+            "description": "Whether it is taking orders right now. Defaults to true.",
+            "example": true
+          }
+        },
+        "required": [
+          "name",
+          "area"
+        ]
+      },
+      "DishResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "restaurantId": {
+            "type": "number",
+            "example": 1,
+            "description": "The restaurant whose menu this dish is on."
+          },
+          "name": {
+            "type": "string",
+            "example": "Doro Wat"
+          },
+          "priceSantim": {
+            "type": "number",
+            "example": 32000,
+            "description": "Whole santim. 32000 is 320.00 ETB."
+          }
+        },
+        "required": [
+          "id",
+          "restaurantId",
+          "name",
+          "priceSantim"
+        ]
+      },
+      "CreateDishDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The dish's name as it appears on the menu.",
+            "example": "Gomen"
+          },
+          "priceSantim": {
+            "type": "number",
+            "description": "The price in whole santim, 1 to 10,000,000. 15000 is 150.00 ETB.",
+            "example": 15000
+          },
+          "restaurantId": {
+            "type": "number",
+            "description": "The restaurant whose menu gets this dish. It must exist (404).",
+            "minimum": 1,
+            "example": 2
+          }
+        },
+        "required": [
+          "name",
+          "priceSantim",
+          "restaurantId"
+        ]
+      }
+    }
+  }
+}
