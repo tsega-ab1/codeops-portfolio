@@ -1,7 +1,7 @@
 // The Day 63 attack list, run against YOUR OWN API on YOUR OWN machine (see attack.sh).
 // Prints what each attack ACTUALLY did. With --write it also writes SECURITY.md from those observed results.
 import { createRequire } from "node:module";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 
 const require = createRequire(process.cwd() + "/");
 const jwt = require("jsonwebtoken");
@@ -169,6 +169,17 @@ if (!almaz || !staff) { console.error("Could not log in on the relaxed server: i
     `${r.status}: ${JSON.stringify(r.json?.message)}`, "400 (forbidNonWhitelisted)", "Both create methods now assign every field by name instead of spreading the body.");
 }
 
+{
+  const r = await call(B, "POST", "/restaurants", { token: almaz, body: { name: "Almaz Cafe", area: "Bole" } });
+  add("x7", "API5", "A customer adds a restaurant (POST /restaurants)", "403: staff only", r.status === 403, `${r.status}: ${JSON.stringify(r.json?.message)}`,
+    "201 for ANY logged-in user: found by the Day 63 route audit", "@Roles(\"staff\") on POST /restaurants.");
+}
+{
+  const r = await call(B, "POST", "/dishes", { token: almaz, body: { name: "Free Dish", priceSantim: 100, restaurantId: 1 } });
+  add("x8", "API5", "A customer adds a dish to a menu (POST /dishes)", "403: staff only", r.status === 403, `${r.status}: ${JSON.stringify(r.json?.message)}`,
+    "201 for ANY logged-in user: found by the Day 63 route audit", "@Roles(\"staff\") on POST /dishes until the DishPolicy homework lets a restaurant manage its own menu.");
+}
+
 // ---------- report
 const pad = (s, n) => String(s).padEnd(n);
 console.log("");
@@ -204,7 +215,7 @@ ${table(extra)}
 | API2 | Broken authentication | Closed | Day 61: argon2, one message for both login failures, short access tokens, rotating refresh tokens; today login and refresh are rate limited |
 | API3 | Broken object property authorisation | Closed for what exists | forbidNonWhitelisted plus explicit field assignment in every create (attacks 2, x4, x6) |
 | API4 | Unrestricted resource consumption | Closed, in memory only | 100 kb body limit, 600 requests a minute per address and route; the counters live in one process |
-| API5 | Broken function-level authorisation | Closed | Day 62: @Roles and the policy (attack 5) |
+| API5 | Broken function-level authorisation | Closed after the route audit | Day 62: @Roles and the policy (attack 5). The audit then found POST /restaurants and POST /dishes open to any login; both are staff only now (x7, x8) |
 | API6 | Unrestricted access to sensitive flows | Closed | Login 5 per 15 minutes, register 3 per hour, refresh 5 per 15 minutes (attack 3) |
 | API7 | Server-side request forgery | Not applicable yet | The API makes no outbound calls until Day 67 |
 | API8 | Security misconfiguration | Closed for today's list | helmet, explicit CORS list, no stack traces, no debug route or /docs in production (attacks 8 to 10, x1) |
@@ -221,7 +232,8 @@ ${table(extra)}
 ## My own attack (homework)
 Add the eleventh row here after reading my own controllers for the check I skipped.
 `;
-  writeFileSync("SECURITY.md", md);
-  console.log("\nWrote SECURITY.md from this run.");
+  const target = existsSync("SECURITY.md") && !process.argv.includes("--force") ? "SECURITY.generated.md" : "SECURITY.md";
+  writeFileSync(target, md);
+  console.log(target === "SECURITY.md" ? "\nWrote SECURITY.md from this run." : "\nSECURITY.md already exists, so I did NOT overwrite it (your own edits are safe).\nWrote SECURITY.generated.md from this run: copy any new rows across by hand, or use --write --force to replace SECURITY.md.");
 }
 process.exit(failed ? 1 : 0);

@@ -1,4 +1,5 @@
 import { Public } from "../common/decorators/public.decorator.js";
+import { Roles } from "../common/decorators/roles.decorator.js";
 import {
   Body,
   Controller,
@@ -9,7 +10,7 @@ import {
   Query,
   UseInterceptors,
 } from "@nestjs/common";
-import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { LocationInterceptor } from "../common/location.interceptor.js";
 import type { Page } from "../common/page.js";
 import { ApiErrors } from "../common/swagger/api-errors.decorator.js";
@@ -39,7 +40,6 @@ export class RestaurantsController {
   }
 
   @Public()
-
   @Get(":id")
   @ApiOperation({ summary: "Get one restaurant by id" })
   @ApiOkResponse({ type: RestaurantResponse })
@@ -49,6 +49,8 @@ export class RestaurantsController {
   }
 
   @Post() // 201 + a Location header pointing at the new restaurant
+  @Roles("staff") // adding a restaurant is Addis Eats staff work (Day 63 audit: it used to need only ANY login)
+  @ApiBearerAuth("bearer")
   @UseInterceptors(LocationInterceptor)
   @ApiOperation({ summary: "Add a restaurant" })
   @ApiCreatedResponse({
@@ -56,7 +58,11 @@ export class RestaurantsController {
     description: "The restaurant was created. The Location header points at it.",
     headers: { Location: { description: "Where the new restaurant lives, for example /api/v1/restaurants/5", schema: { type: "string" } } },
   })
-  @ApiErrors({ 400: "Validation failed: a field is missing or malformed, or an undeclared field was sent." })
+  @ApiErrors({
+    400: "Validation failed: a field is missing or malformed, or an undeclared field was sent.",
+    401: "Missing, invalid or expired access token.",
+    403: "The caller is not staff.",
+  })
   create(@Body() dto: CreateRestaurantDto): Restaurant {
     return this.restaurants.create(dto);
   }
