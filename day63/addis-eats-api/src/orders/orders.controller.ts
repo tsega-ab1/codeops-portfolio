@@ -36,6 +36,7 @@ import { UpdateStatusDto } from "./dto/update-status.dto.js";
 import type { Order } from "./order.types.js";
 import { OrdersService } from "./orders.service.js";
 
+@ApiBearerAuth("bearer") // every order route needs a token: say so once, for the whole controller
 @ApiTags("orders")
 @Controller("orders")
 export class OrdersController {

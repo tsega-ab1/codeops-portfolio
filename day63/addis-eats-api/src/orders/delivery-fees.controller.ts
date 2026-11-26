@@ -14,7 +14,6 @@ export class DeliveryFeesController {
   constructor(private readonly orders: OrdersService) {}
 
   @Public()
-
   @Get()
   @ApiOperation({
     summary: "What delivery costs in one area",

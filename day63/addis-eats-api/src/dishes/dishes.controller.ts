@@ -1,4 +1,5 @@
 import { Public } from "../common/decorators/public.decorator.js";
+import { Roles } from "../common/decorators/roles.decorator.js";
 import {
   Body,
   Controller,
@@ -9,7 +10,7 @@ import {
   Query,
   UseInterceptors,
 } from "@nestjs/common";
-import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { LocationInterceptor } from "../common/location.interceptor.js";
 import type { Page } from "../common/page.js";
 import { ApiErrors } from "../common/swagger/api-errors.decorator.js";
@@ -26,7 +27,6 @@ export class DishesController {
   constructor(private readonly dishes: DishesService) {}
 
   @Public()
-
   @Get()
   @ApiOperation({
     summary: "List dishes across all menus, searched, sorted and paged",
@@ -39,7 +39,6 @@ export class DishesController {
   }
 
   @Public()
-
   @Get(":id")
   @ApiOperation({ summary: "Get one dish by id" })
   @ApiOkResponse({ type: DishResponse })
@@ -49,6 +48,10 @@ export class DishesController {
   }
 
   @Post() // 201 + a Location header pointing at the new dish
+  // Staff only for now. The restaurant role may add dishes to ITS OWN menu only: that needs a DishPolicy (homework),
+  // because the token does not say which restaurant a user belongs to.
+  @Roles("staff")
+  @ApiBearerAuth("bearer")
   @UseInterceptors(LocationInterceptor)
   @ApiOperation({ summary: "Add a dish to a restaurant's menu" })
   @ApiCreatedResponse({
@@ -58,6 +61,8 @@ export class DishesController {
   })
   @ApiErrors({
     400: "Validation failed: a field is missing or malformed, the price is not a whole number of santim between 1 and 10,000,000, or an undeclared field was sent.",
+    401: "Missing, invalid or expired access token.",
+    403: "The caller is not staff.",
     404: "The restaurant does not exist.",
   })
   create(@Body() dto: CreateDishDto): Dish {

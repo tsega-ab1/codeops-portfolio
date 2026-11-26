@@ -15,7 +15,6 @@ export class RestaurantDishesController {
   constructor(private readonly dishes: DishesService) {}
 
   @Public()
-
   @Get()
   @ApiOperation({
     summary: "List one restaurant's menu",
@@ -34,7 +33,6 @@ export class RestaurantDishesController {
   }
 
   @Public()
-
   @Get(":dishId")
   @ApiOperation({
     summary: "Get one dish of one restaurant",

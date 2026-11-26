@@ -25,3 +25,41 @@ The Day 56 route surface (16 routes) checked against the nine naming rules.
 
 ## Consequence
 Both routes are gone, so `/api/v1/orders/pending` now falls through to `/api/v1/orders/:id`, and `ParseIntPipe` answers 400. The API is one row shorter per rename in the startup log.
+
+# Authorisation audit - Day 62 homework, rechecked on Day 63
+
+Every endpoint classified as **public**, **any login**, **role only** or **policy**. Nothing is left unclassified.
+Checked against the decorators in the code, not from memory, and against `openapi.json`.
+
+| Route | Who may call it | Gate | Rate limit |
+|---|---|---|---|
+| GET /health | anyone | public | none (a load balancer polls it) |
+| POST /auth/register | anyone | public | 3 per hour per address |
+| POST /auth/login | anyone | public | 5 per 15 minutes per address |
+| POST /auth/refresh | a holder of a refresh token | public | 5 per 15 minutes per address |
+| GET /auth/me | any login | token | default |
+| GET /delivery-fees | anyone | public | default |
+| GET /restaurants, GET /restaurants/:id | anyone | public | default |
+| GET /dishes, GET /dishes/:id | anyone | public | default |
+| GET /restaurants/:id/dishes, GET /restaurants/:id/dishes/:dishId | anyone | public | default |
+| POST /restaurants | staff | **role only** | default |
+| POST /dishes | staff | **role only** (restaurant role: DishPolicy homework) | default |
+| GET /orders | any login | token, and the **service filters** the list by OrderPolicy | default |
+| GET /restaurants/:id/orders | any login | token, and the **service filters** the list by OrderPolicy | default |
+| POST /orders | any login | token; the owner is taken from the token, never from the body | default |
+| GET /orders/:id | the customer, the assigned courier, staff | **policy** `read` (404 for everyone else) | default |
+| DELETE /orders/:id | staff; the owner while PENDING | **policy** `cancel` (403 once it cannot be cancelled) | default |
+| PATCH /orders/:id/status | staff; the assigned courier | **role** courier or staff, then **policy** `updateStatus` | default |
+| GET /debug/* | staff, development only | role only; the module is not mounted in production | default |
+
+"Public" on the catalogue routes is on purpose: a menu is meant to be read by anyone. Public data is what a competitor would scrape,
+so those routes are protected by rate limiting (Day 63), not by a login.
+
+## What the audit found (and fixed on Day 63)
+1. **POST /restaurants and POST /dishes needed only some login.** Any customer could add a restaurant or put a dish on a menu. They are now `@Roles("staff")`.
+   The restaurant role should be able to add dishes to its *own* menu: that needs a `DishPolicy` and the user's `restaurantId`, which the token does not carry yet (homework).
+2. **The OpenAPI spec did not mark GET /orders, POST /orders or GET /orders/:id as needing a token.** The routes were protected, but Swagger's Authorize button
+   would not have sent the token for them. `@ApiBearerAuth` is now on the whole orders controller.
+
+## Still open, on purpose
+- The restaurant role has no order rights yet: it sees no orders and cannot change one. The rules table does not say what it should be able to do, which is a product question.
